@@ -88,4 +88,4 @@ data/
 
 # Rope project settings
 .ropeproject
-.gitignore
+#.gitignore
