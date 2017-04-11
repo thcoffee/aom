@@ -3,6 +3,7 @@ echo `date`
 git add bin
 git add conf
 git add _modules
+git add sls
 git add .gitignore
 git add README.md
 git commit -m "`date +%Y-%m-%d` backup"
