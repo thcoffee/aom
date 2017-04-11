@@ -4,5 +4,5 @@ git add bin
 git add conf
 git add .gitignore
 git add README.md
-git commit -m "`date +%Y-%m-%d`-01 backup"
+git commit -m "`date +%Y-%m-%d` backup"
 git push piter master
