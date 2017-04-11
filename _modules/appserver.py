@@ -12,8 +12,8 @@ def get_file():
     a=caller.cmd('cp.get_file','salt://Python-3.4.6.tgz','/root/Python-3.4.6.tgz')
     return a
 
+#1
 def getdate():
-    time.sleep(10)
     return _getDate()
 
 def _getDate():
