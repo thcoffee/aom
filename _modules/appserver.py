@@ -1,5 +1,6 @@
 import os,time
 import salt.client
+import dayin
 def getpid(msg):
     time.sleep(10)
     return(msg+str(os.getpid()))
@@ -31,3 +32,6 @@ def mark(taskid):
         time.sleep(10)
         myfile.write(taskid+' end\n')
         myfile.flush()
+
+def dy():
+    return(dayin.dayin())
