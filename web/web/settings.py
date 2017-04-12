@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'aom',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +55,7 @@ ROOT_URLCONF = 'web.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -79,7 +80,7 @@ DATABASES = {
         'NAME': 'aom',
         'USER':'root',
         'PASSWORD':'jljtmysql',
-        'HOST':'10.68.2.205',
+        'HOST':'test205',
         'PORT':'3306',
     }
 }  
@@ -120,5 +121,17 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
-
+PROJECT_PATH=os.path.abspath(os.path.dirname(__file__))
+STATIC_ROOT=os.path.join(os.path.dirname(PROJECT_PATH),'static')
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS=(
+('css',os.path.join(STATIC_ROOT,'css')),
+('font-awesome',os.path.join(STATIC_ROOT,'font-awesome')),
+('img',os.path.join(STATIC_ROOT,'img')),
+('js',os.path.join(STATIC_ROOT,'js')),
+('plugins',os.path.join(STATIC_ROOT,'plugins')),
+('tools',os.path.join(STATIC_ROOT,'css')),
+('bootstrap',os.path.join(STATIC_ROOT,'bootstrap')),
+('html',os.path.join(STATIC_ROOT,'html')),
+)
