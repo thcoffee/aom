@@ -2,52 +2,141 @@
 
 <html lang="zh-Hans" >
 <head>
+    <meta charset="utf-8">
+
+    
     <link href="/static/css/bootstrap.css" rel="stylesheet">
+   
+    
+    <script type="text/javascript" src="/static/js/jquery.js"></script>
     <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="/static/js/npm.js"></script>
-     <script type="text/javascript" src="/static/js/jquery.js"></script>
+    <!--
+    <link href="/static/css/blog.css" rel="stylesheet">
+     <link href="/static/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script type="text/javascript" src="/static/js/ie-emulation-modes-warning.js"></script>
+    -->
 </head>
 
-<body >
- <nav class="navbar navbar-default">
-  <div class="navbar-heade">
-     <h1> AOM</h1>
-  </div>
-
-</nav>
-<div class="dropdown">
-  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-    Dropdown
-    <span class="caret"></span>
-  </button>
-  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-    <li><a href="#">Action</a></li>
-    <li><a href="#">Another action</a></li>
-    <li><a href="#">Something else here</a></li>
-    <li role="separator" class="divider"></li>
-    <li><a href="#">Separated link</a></li>
-  </ul>
-</div>
-
-  <div class="container">
-  
-    <div class="row">
-     <p class="bg-primary">
-      <div class="col-md-1">.col-md-1</div>
-      <div class="col-md-1">.col-md-1</div>
-      <div class="col-md-1">.col-md-1</div>
-      <div class="col-md-1">.col-md-1</div>
-      <div class="col-md-1">.col-md-1</div>
-      <div class="col-md-1">.col-md-1</div>
-      <div class="col-md-1">.col-md-1</div>
-      <div class="col-md-1">.col-md-1</div>
-      <div class="col-md-1">.col-md-1</div>
-      <div class="col-md-1">.col-md-1</div>
-      <div class="col-md-1">.col-md-1</div>
-      <div class="col-md-1">.col-md-1</div>
-     </p> 
+<body>
+<nav class="navbar navbar-default"  role="navigation">
+    <div class="navbar-header">
+        <a class="navbar-brand" href="#">AOM</a>
     </div>
-  </div>
+    <table height=50 style=border-color:#d0d0d0;border-left-style:solid;border-width:1px><tr><td valign=top>
+    <div>
+        <ul class="nav navbar-nav">
+            <li ><a href="#">首页</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    部署<b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="#">TOMCAT WAR包</a></li>
+                    <li><a href="#">TOMCAT 非WAR包</a></li>
+                    <li class="divider"></li>
+                    <li><a href="#">未知</a></li>
+                    <li class="divider"></li>
+                    <li><a href="#">未知</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    </table>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-2">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        面板标题
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <h6>这是一个基本的面板今天是个好日子</h6>
+                    <h6>这是一个基本的面板</h6>
+                    <h6>这是一个基本的面板</h6>
+                    <h6>这是一个基本的面板</h6>
+                    <h6>这是一个基本的面板</h6>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        面板标题
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <h6>这是一个基本的面板</h6>
+                    <h6>这是一个基本的面板</h6>
+                    <h6>这是一个基本的面板</h6>
+                    <h6>这是一个基本的面板</h6>
+                    <h6>这是一个基本的面板</h6>
+                </div>
+            </div>
+        </div>
+ 
+        <div class="col-md-10">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    表格示例
+                </h3>
+            </div>
+            <div class="panel-body">
+                <table class="table table-hover">
+                <thead>
+                    <tr>
+                    <th>名称</th>
+                    <th>城市</th>
+                    <th>邮编</th>
+                    <th>区号</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td>Tanmay</td>
+                    <td>Bangalore</td>
+                    <td>560001</td>
+                    <td>560001</td>
+                    </tr>
+                    <tr>
+                    <td>Sachin</td>
+                    <td>Mumbai</td>
+                    <td>400003</td>
+                    <td>560001</td>
+                    </tr>
+                    <tr>
+                    <td>Uma</td>
+                    <td>Pune</td>
+                    <td>411027</td>
+                    <td>560001</td>
+                    </tr>
+                </tbody>
+    
+                </table>
+                <ul class="pagination">
+                    <li><a href="#">&laquo;</a></li>
+                    <li><a href="#">1</a></li>
+                    <li><a href="#">2</a></li>
+                    <li><a href="#">3</a></li>
+                    <li><a href="#">4</a></li>
+                    <li><a href="#">5</a></li>
+                    <li><a href="#">&raquo;</a></li>
+                </ul>
+            </div>    
+        </div>
+    </div>
 </div>
+<div id="footer" class="container">
+<nav class="navbar navbar-default navbar-fixed-bottom">
+    <div class="navbar-inner navbar-content-center">
+        <p class="text-muted credit" style="padding: 10px;">
+            ....
+        </p>
+    </div>
+</nav>
 </body>
 </html>
