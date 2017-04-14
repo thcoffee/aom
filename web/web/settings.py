@@ -82,7 +82,15 @@ DATABASES = {
         'PASSWORD':'jljtmysql',
         'HOST':'test205',
         'PORT':'3306',
-    }
+    },
+    'zsj': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'adc',
+        'USER':'root',
+        'PASSWORD':'jljtmysql',
+        'HOST':'test205',
+        'PORT':'3306',
+    },
 }  
 
 # Password validation

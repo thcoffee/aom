@@ -1,21 +1,10 @@
 ﻿<!DOCTYPE html>
-
 <html lang="zh-Hans" >
 <head>
-    <meta charset="utf-8">
-
-    
-    <link href="/static/css/bootstrap.css" rel="stylesheet">
-   
-    
+    <meta charset="utf-8">   
+    <link href="/static/css/bootstrap.css" rel="stylesheet">   
     <script type="text/javascript" src="/static/js/jquery.js"></script>
     <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
-    <!--
-    <link href="/static/css/blog.css" rel="stylesheet">
-     <link href="/static/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
-    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
-    <script type="text/javascript" src="/static/js/ie-emulation-modes-warning.js"></script>
-    -->
 </head>
 
 <body>
@@ -87,56 +76,58 @@
             </div>
             <div class="panel-body">
                 <table class="table table-hover">
-                <thead>
-                    <tr>
-                    <th>名称</th>
-                    <th>城市</th>
-                    <th>邮编</th>
-                    <th>区号</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                    <td>Tanmay</td>
-                    <td>Bangalore</td>
-                    <td>560001</td>
-                    <td>560001</td>
-                    </tr>
-                    <tr>
-                    <td>Sachin</td>
-                    <td>Mumbai</td>
-                    <td>400003</td>
-                    <td>560001</td>
-                    </tr>
-                    <tr>
-                    <td>Uma</td>
-                    <td>Pune</td>
-                    <td>411027</td>
-                    <td>560001</td>
-                    </tr>
-                </tbody>
-    
-                </table>
+                    <thead>
+                        <tr>
+                        {% for i in objects_head %}
+                        <th>{{i}}</th>
+                        {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in objects %}
+                        <tr>
+                            {% for j in i %}
+                            <td>{{j}}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>             
+                </table>   
+                            
                 <ul class="pagination">
-                    <li><a href="#">&laquo;</a></li>
-                    <li><a href="#">1</a></li>
-                    <li><a href="#">2</a></li>
-                    <li><a href="#">3</a></li>
-                    <li><a href="#">4</a></li>
-                    <li><a href="#">5</a></li>
-                    <li><a href="#">&raquo;</a></li>
+                    {% if objects.has_previous %}
+                    <li><a href="?page={{ objects.previous_page_number }}">前一页</a></li>
+                    {% else %}
+                    <li class="active"><a>前一页</a></li>
+                    {% endif %}
+                
+                    {% for p in page_range %}
+                        {% ifequal p objects.number %}
+                        <li class="active"><a>{{p}}</a></li>
+                        {% else %}
+                        <li><a href="?page={{p}}" title="第{{p}}页">{{p}}</a><li>
+                        {% endifequal %}
+                    {% endfor %}
+                
+                    {% if objects.has_next %}
+                    <li><a href="?page={{ objects.next_page_number }}">后一页</a></li>
+                    {% else %}
+                    <li class="active"> <a>后一页</a></li>
+                    {% endif %}
                 </ul>
             </div>    
         </div>
     </div>
 </div>
+
+  {{page_range}}  
 <div id="footer" class="container">
-<nav class="navbar navbar-default navbar-fixed-bottom">
-    <div class="navbar-inner navbar-content-center">
-        <p class="text-muted credit" style="padding: 10px;">
-            ....
-        </p>
-    </div>
-</nav>
+    <nav class="navbar navbar-default navbar-fixed-bottom">
+        <div class="navbar-inner navbar-content-center">
+            <p class="text-muted credit" style="padding: 10px;" align="center">
+                团结 紧张 严肃 活泼
+            </p>
+        </div>
+    </nav>
 </body>
 </html>
