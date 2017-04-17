@@ -8,7 +8,7 @@ def _getData(sql):
     cur.execute(sql)
     return(cur.fetchall())
     
-def _my_pagination(request, queryset, display_amount=10, after_range_num = 5,bevor_range_num = 4):
+def _my_pagination(request, queryset, display_amount=10, after_range_num = 3,bevor_range_num = 2):
     #按参数分页
     paginator = Paginator(queryset, display_amount)
     try:
@@ -40,10 +40,10 @@ def _my_pagination(request, queryset, display_amount=10, after_range_num = 5,bev
         page_range = paginator.page_range[0:bevor_range_num+bevor_range_num+1]
     return objects,page_range
     
-def index(request):
+def test(request):
     sql1=[]
     sql1.append('select * from adc_deploy order by 1 limit 0,121')
     objects, page_range = _my_pagination(request, _getData(''.join(sql1)))
     objects_head=['字段1','字段2','字段3','字段4','字段5','字段6']
     data={'objects':objects,'page_range':page_range,'objects_head':objects_head}
-    return render(request, 'aom/index.html',data)
+    return render(request, 'aom/test.html',data)
