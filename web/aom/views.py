@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.db import connections,transaction
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required 
 # Create your views here.
 
 def _getData(sql):
@@ -39,11 +40,22 @@ def _my_pagination(request, queryset, display_amount=10, after_range_num = 3,bev
     else:
         page_range = paginator.page_range[0:bevor_range_num+bevor_range_num+1]
     return objects,page_range
-    
+
+def _initPage(request):
+    data={}
+    data['userid']=str(request.user)
+    return(data)
+@login_required(login_url="/admin/login/")      
 def test(request):
+    data=_initPage(request)
     sql1=[]
     sql1.append('select * from adc_deploy order by 1 limit 0,121')
     objects, page_range = _my_pagination(request, _getData(''.join(sql1)))
     objects_head=['字段1','字段2','字段3','字段4','字段5','字段6']
-    data={'objects':objects,'page_range':page_range,'objects_head':objects_head}
+    data['objects']=objects
+    data['page_range']=page_range
+    data['objects_head']=objects_head
     return render(request, 'aom/test.html',data)
+    
+def test1(request):
+    return render(request, 'aom/head.html',{})
