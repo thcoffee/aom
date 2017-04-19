@@ -20,6 +20,6 @@ a=client.cmd(**b)
 #    a=client.get_cache_returns(c)
 #    print yaml.dump(a,default_flow_style=False)
 #    time.sleep(2)
-print yaml.dump(a,default_flow_style=False) 
+print(yaml.dump(a,default_flow_style=False)) 
 #for i in a:
 #    print 'neirong:',yaml.dump(i,default_flow_style=False)
