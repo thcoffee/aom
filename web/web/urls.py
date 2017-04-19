@@ -15,8 +15,10 @@ Including another URLconf
 """
 from django.conf.urls import include, url  
 from django.contrib import admin
+import aom
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^aom/',include('aom.urls')),
+    url(r'^$',aom.views.test),
 ]
