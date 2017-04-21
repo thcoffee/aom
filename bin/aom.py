@@ -4,6 +4,12 @@ import sys,os,time
 import zmq
 import threading
 import yaml
+import psutil
+from functions import config
+os.chdir(os.path.split(os.path.realpath(__file__))[0])
+
+params=config.configObject()
+params=params.getConf()
 
 class IPCInterface(threading.Thread):
     def __init__(self):
@@ -19,7 +25,7 @@ class IPCInterface(threading.Thread):
     def _run(self):
         context = zmq.Context()
         socket = context.socket(zmq.REP)
-        rc = socket.bind("ipc:///tmp/"+str('0'))
+        rc = socket.bind("ipc://"+params['IPCFile'])
         message = socket.recv()
         if message=='status':
             socket.send("server response! PID:"+str(os.getpid()))
@@ -89,7 +95,7 @@ class serverInit(object):
         context = zmq.Context()
         socket = context.socket(zmq.REQ)
         socket.setsockopt(zmq.LINGER, 0) 
-        socket.connect("ipc:///tmp/0")
+        socket.connect("ipc://"+params['IPCFile'])
         socket.send(flag)
         poller = zmq.Poller()  
         poller.register(socket, zmq.POLLIN)  
@@ -109,7 +115,7 @@ class serverInit(object):
         return(yaml.dump(msg,default_flow_style=False))
     
     def _ipcExists(self):
-        if os.path.exists('/tmp/0'):
+        if os.path.exists(params['IPCFile']):
             return(True)
         else:
             return(False)
