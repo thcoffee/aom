@@ -6,6 +6,8 @@ import threading
 import yaml
 import psutil
 from functions import config
+
+baseHome=os.path.realpath(__file__)
 os.chdir(os.path.split(os.path.realpath(__file__))[0])
 
 params=config.configObject()
@@ -69,11 +71,11 @@ class serverInit(object):
         if self._ipcExists():
             print('Process has been started')
         else:
-            path=os.path.realpath(__file__)
-            subprocess.Popen([path,'-d'])
+            subprocess.Popen([baseHome,'-d'])
             print(self._getIPCMsg(flag))
             
     def _demon(self):
+        #self._setPidFile()
         t=IPCInterface()
         t.run()
         while 1:
@@ -91,6 +93,10 @@ class serverInit(object):
         else:
             print('Process has not started')
             
+    def _setPidFile(self):
+        with open(params['pidFile'],'w') as myfile:
+            myfile.write(str(os.getpid()))
+            
     def _getIPCMsg(self,flag):
         context = zmq.Context()
         socket = context.socket(zmq.REQ)
@@ -106,12 +112,7 @@ class serverInit(object):
             #raise IOError("Timeout processing auth request")             
     
     def _help(self):
-        msg={'help':{'da.py $parameter':[
-                     'da.py start    *Start the process',
-                     'da.py stop     *Stop the process',
-                     'da.py restart  *Restart the process',
-                     'da.py status   *Check the process status']}}          
-    
+        msg= params['help']      
         return(yaml.dump(msg,default_flow_style=False))
     
     def _ipcExists(self):

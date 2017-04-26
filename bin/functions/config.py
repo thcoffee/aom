@@ -29,4 +29,9 @@ class configObject(object):
         self.configStatic={
                            'pidFile':'../conf/aom.pid',
                            'IPCFile':'../tmp/ipc',
-                            }
+                           'help':{'help':{'da.py $parameter':[
+                                           'da.py start    *Start the process',
+                                           'da.py stop     *Stop the process',
+                                           'da.py restart  *Restart the process',
+                                           'da.py status   *Check the process status']}},
+                          }
