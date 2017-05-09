@@ -8,6 +8,7 @@ import yaml
 import psutil
 import logging
 import logging.config
+import traceback
 from functions import config
 
 #获取基础路径
@@ -25,47 +26,114 @@ baseParams=baseParams.getConf()
 logging.config.fileConfig("../conf/logging.conf")
 stdLogger = logging.getLogger("root")
 
-
+threadList={'test':''}
+systemDict={'main':
+                  {'target':'on','state':'on'},
+            'thread':{
+                      'test':{
+                              'switch':{'target':'on','state':'on'},
+                              'threadStatus':'',
+                             }
+                     },
+            }
 
 #ipc通讯接口
 class IPCInterface(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
+        self.flag=True
         self.daemon = True
         self.start()
         
     def run(self): 
-        
-        while 1:
+        try:
             self._run()
+        except Exception as info:
+            stdLogger.error(traceback.format_exc())
+            stdLogger.error('The thread IPCInterface collapse')
+        
     
     def _run(self):
+        while 1:
+            if self.flag:
+                self.ipcFun()
+            else:
+                break
+    
+    def ipcFun(self):
         context = zmq.Context()
         socket = context.socket(zmq.REP)
         rc = socket.bind("ipc://"+baseParams['IPCFile'])
         message = socket.recv()
         if message=='status':
-            socket.send("server response! PID:"+str(os.getpid()))
-        elif message=='stop':   
-            socket.send("Stop to finish")
-            stdLogger.info('Stop to finish')
-            sys.exit(1)
+            systemDict['thread']['test']['threadStatus']=threadList['test'].isAlive() 
+            socket.send("server response! PID:"+str(os.getpid())+'\n'+yaml.dump(systemDict,default_flow_style=False))
+        elif message=='stop':  
+            self.flag=False
+            self.checkProcessEnd()
+            socket.send('Process stop completion.')
+            systemDict['main']['target']='off'                   
         elif message=='start':
             socket.send("Start to finish,pid:"+str(os.getpid()))
+            
+    def _stop(self,socket):
+        pass
+            
+    def checkProcessEnd(self):
+        for i in systemDict['thread']:
+            systemDict['thread'][i]['switch']['target']='off'
+          
+        for j in systemDict['thread']:
+            for x in range(5):
+                if systemDict['thread'][j]['switch']['state']=='off':
+                    break
+                time.sleep(1)
 
+ #测试进程               
+class test(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.daemon=True
+        self.start()
+ 
+    def run(self):
+        try:
+            self._run()
+        except Exception as info:
+            stdLogger.error(traceback.format_exc())
+            stdLogger.error('The thread test collapse')
+            systemDict['thread']['test']['switch']['state']='off'
+            
+    def _run(self):
+        while 1:
+            if systemDict['thread']['test']['switch']['target']=='off':
+                systemDict['thread']['test']['switch']['state']='off'
+                stdLogger.info('The thread test has stopped.')
+                break
+            a=b+c
+            time.sleep(1)   
+    
             
 class serverDaemon(object): 
     def __init__(self):
         pass
+
         
-    def run(self):
-        pass
+    def run(self):   
+        stdLogger.info("Start to finish,pid:"+str(os.getpid()))
+        t=IPCInterface()
+        t1=test()
+        threadList['test']=t1
+        while 1:
+            if systemDict['main']['target']=='off':
+                stdLogger.info('Process stop completion.')
+                break
+            time.sleep(1)
 
 #服务端初始化
 class serverInit(object):
     def __init__(self,param):
         self.param=param
-        self.threadList={}
         pass
 
     def run(self):
@@ -95,15 +163,13 @@ class serverInit(object):
             
     #守护进程
     def _demon(self):
-        stdLogger.info("Start to finish,pid:"+str(os.getpid()))
-        #self._setPidFile()
-        t=IPCInterface()
-        t.run()
-        while 1:
-            time.sleep(1)
+        s=serverDaemon()
+        s.run()
+        
             
     def _stop(self,flag):
         if self._ipcExists():
+            print('The process is stopping. Please wait.')
             print(self._getIPCMsg(flag))
         else:
             print('Process has not started')
@@ -127,7 +193,7 @@ class serverInit(object):
         socket.send(flag)
         poller = zmq.Poller()  
         poller.register(socket, zmq.POLLIN)  
-        if poller.poll(10*1000): # 10s timeout in milliseconds     
+        if poller.poll(360*1000): # 10s timeout in milliseconds     
             return (socket.recv())
         else:  
             return('The process has no response')
