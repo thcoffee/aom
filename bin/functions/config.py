@@ -1,4 +1,6 @@
 import yaml,os
+import logging 
+import logging.config
 
 class configObject(object):
     def __init__(self):

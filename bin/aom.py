@@ -16,17 +16,20 @@ baseHome=os.path.realpath(__file__)
 
 #修改默认路径
 os.chdir(os.path.split(os.path.realpath(__file__))[0])
-
-#获取基础参数
-baseParams=config.configObject()
-baseParams=baseParams.getConf()
+#print(os.popen('pwd').read())
 
 #设置日志格式
 #os.makedirs("../log", exist_ok=True)
 logging.config.fileConfig("../conf/logging.conf")
 stdLogger = logging.getLogger("root")
+warLogger = logging.getLogger("warLog")
 
-threadList={'test':''}
+from functions import test1
+#获取基础参数
+baseParams=config.configObject()
+baseParams=baseParams.getConf()
+
+threadList={}
 systemDict={'main':
                   {'target':'on','state':'on'},
             'thread':{
@@ -56,11 +59,11 @@ class IPCInterface(threading.Thread):
     def _run(self):
         while 1:
             if self.flag:
-                self.ipcFun()
+                self._ipcFun()
             else:
                 break
     
-    def ipcFun(self):
+    def _ipcFun(self):
         context = zmq.Context()
         socket = context.socket(zmq.REP)
         rc = socket.bind("ipc://"+baseParams['IPCFile'])
@@ -70,16 +73,17 @@ class IPCInterface(threading.Thread):
             socket.send("server response! PID:"+str(os.getpid())+'\n'+yaml.dump(systemDict,default_flow_style=False))
         elif message=='stop':  
             self.flag=False
-            self.checkProcessEnd()
+            self._checkProcessEnd()
             socket.send('Process stop completion.')
             systemDict['main']['target']='off'                   
         elif message=='start':
             socket.send("Start to finish,pid:"+str(os.getpid()))
-            
-    def _stop(self,socket):
-        pass
-            
-    def checkProcessEnd(self):
+        else:
+            socket.send('unknow parameter')
+
+    
+#给所有线程下关闭指令 检测所有线程是否停止    
+    def _checkProcessEnd(self):
         for i in systemDict['thread']:
             systemDict['thread'][i]['switch']['target']='off'
           
@@ -100,6 +104,7 @@ class test(threading.Thread):
         try:
             self._run()
         except Exception as info:
+            test1.ddd()
             stdLogger.error(traceback.format_exc())
             stdLogger.error('The thread test collapse')
             systemDict['thread']['test']['switch']['state']='off'
