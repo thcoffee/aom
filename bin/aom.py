@@ -52,6 +52,7 @@ class IPCInterface(threading.Thread):
         try:
             self._run()
         except Exception as info:
+            systemDict['main']['target']='off'  
             stdLogger.error(traceback.format_exc())
             stdLogger.error('The thread IPCInterface collapse')
         
@@ -67,19 +68,22 @@ class IPCInterface(threading.Thread):
         context = zmq.Context()
         socket = context.socket(zmq.REP)
         rc = socket.bind("ipc://"+baseParams['IPCFile'])
-        message = socket.recv()
-        if message=='status':
+        message = socket.recv_json()
+        if message['action']=='status':
             systemDict['thread']['test']['threadStatus']=threadList['test'].isAlive() 
-            socket.send("server response! PID:"+str(os.getpid())+'\n'+yaml.dump(systemDict,default_flow_style=False))
-        elif message=='stop':  
+            socket.send_json({'data':{"server response! PID:"+str(os.getpid()):systemDict}})
+        elif message['action']=='stop':  
             self.flag=False
             self._checkProcessEnd()
-            socket.send('Process stop completion.')
+            socket.send_json({'data':'Process stop completion.'})
             systemDict['main']['target']='off'                   
-        elif message=='start':
-            socket.send("Start to finish,pid:"+str(os.getpid()))
+        elif message['action']=='start':
+            socket.send_json({'data':"Start to finish,pid:"+str(os.getpid())})
+        elif message['action']=='addlog':
+            stdLogger.info(message['data'])
+            socket.send_json({'data':'addlog completion.'})
         else:
-            socket.send('unknow parameter')
+            socket.send_json({'data':'unknow parameter'})
 
     
 #给所有线程下关闭指令 检测所有线程是否停止    
@@ -142,29 +146,40 @@ class serverInit(object):
         pass
 
     def run(self):
-        if len(self.param)!=2:
+        if len(self.param)<2:
             print(self._help())
         elif self.param[1]=='start':
-            self._start(self.param[1])
+            self._start({'action':self.param[1],'data':''})
         elif self.param[1]=='-d':
             self._demon()
         elif self.param[1]=='status':
-            self._status(self.param[1])
+            self._status({'action':self.param[1],'data':''})
         elif self.param[1]=='stop':
-            self._stop(self.param[1])
+            self._stop({'action':self.param[1],'data':''})
         elif self.param[1]=='restart':
-            self._stop('stop')
-            self._start('start')
+            self._stop({'action':'stop','data':''})
+            self._start({'action':'start','data':''})
+        elif len(self.param)==3:
+            if self.param[1]=='addlog' and self.param[2]:
+                self._addlog({'action':self.param[1],'data':self.param[2]})
         else:
             print(self._help())
     
+
+    def _addlog(self,flag):
+        if self._ipcExists():
+            print('The process is stopping. Please wait.')
+            print(self._getIPCMsg(flag)['data'])
+        else:
+            print('Process has not started')    
+
     #启动进程
     def _start(self,flag):
         if self._ipcExists():
             print('Process has been started')
         else:
             subprocess.Popen([baseHome,'-d'])
-            print(self._getIPCMsg(flag))
+            print(self._getIPCMsg(flag)['data'])
             
     #守护进程
     def _demon(self):
@@ -175,13 +190,13 @@ class serverInit(object):
     def _stop(self,flag):
         if self._ipcExists():
             print('The process is stopping. Please wait.')
-            print(self._getIPCMsg(flag))
+            print(self._getIPCMsg(flag)['data'])
         else:
             print('Process has not started')
             
     def _status(self,flag):
         if self._ipcExists():
-            print(self._getIPCMsg(flag))
+            print(yaml.dump(self._getIPCMsg(flag)['data'],default_flow_style=False))
         else:
             print('Process has not started')
             
@@ -195,11 +210,11 @@ class serverInit(object):
         socket = context.socket(zmq.REQ)
         socket.setsockopt(zmq.LINGER, 0) 
         socket.connect("ipc://"+baseParams['IPCFile'])
-        socket.send(flag)
+        socket.send_json(flag)
         poller = zmq.Poller()  
         poller.register(socket, zmq.POLLIN)  
         if poller.poll(360*1000): # 10s timeout in milliseconds     
-            return (socket.recv())
+            return (socket.recv_json())
         else:  
             return('The process has no response')
             #raise IOError("Timeout processing auth request")             
