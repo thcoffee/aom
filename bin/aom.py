@@ -29,7 +29,10 @@ from functions import test1
 baseParams=config.configObject()
 baseParams=baseParams.getConf()
 
+#线程池
 threadList={}
+
+#系统字典
 systemDict={'main':
                   {'target':'on','state':'on'},
             'thread':{
@@ -92,7 +95,7 @@ class IPCInterface(threading.Thread):
             systemDict['thread'][i]['switch']['target']='off'
           
         for j in systemDict['thread']:
-            for x in range(5):
+            for x in range(360):
                 if systemDict['thread'][j]['switch']['state']=='off':
                     break
                 time.sleep(1)
@@ -122,7 +125,8 @@ class test(threading.Thread):
             a=b+c
             time.sleep(1)   
     
-            
+
+#守护进程    
 class serverDaemon(object): 
     def __init__(self):
         pass
@@ -168,7 +172,7 @@ class serverInit(object):
 
     def _addlog(self,flag):
         if self._ipcExists():
-            print('The process is stopping. Please wait.')
+            print('The process is addlog. Please wait.')
             print(self._getIPCMsg(flag)['data'])
         else:
             print('Process has not started')    
