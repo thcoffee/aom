@@ -83,6 +83,7 @@ venv/
 ENV/
 data/
 tmp/
+software/
 # Spyder project settings
 .spyderproject
 

@@ -25,6 +25,7 @@ stdLogger = logging.getLogger("root")
 warLogger = logging.getLogger("warLog")
 
 from functions import test1
+from functions import deploy
 #获取基础参数
 baseParams=config.configObject()
 baseParams=baseParams.getConf()
@@ -39,7 +40,11 @@ systemDict={'main':
                       'test':{
                               'switch':{'target':'on','state':'on'},
                               'threadStatus':'',
-                             }
+                             },
+                       'deployAntWar':{
+                              'switch':{'target':'on','state':'on'},
+                              'threadStatus':'',
+                             }      
                      },
             }
 
@@ -74,6 +79,7 @@ class IPCInterface(threading.Thread):
         message = socket.recv_json()
         if message['action']=='status':
             systemDict['thread']['test']['threadStatus']=threadList['test'].isAlive() 
+            systemDict['thread']['deployAntWar']['threadStatus']=threadList['deployAntWar'].isAlive() 
             socket.send_json({'data':{"server response! PID:"+str(os.getpid()):systemDict}})
         elif message['action']=='stop':  
             self.flag=False
@@ -137,6 +143,8 @@ class serverDaemon(object):
         t=IPCInterface()
         t1=test()
         threadList['test']=t1
+        dAW=deploy.deployAntWar(**{'threadList':threadList,'systemDict':systemDict})
+        threadList['deployAntWar']=dAW
         while 1:
             if systemDict['main']['target']=='off':
                 stdLogger.info('Process stop completion.')
