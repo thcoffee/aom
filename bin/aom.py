@@ -16,6 +16,7 @@ baseHome=os.path.realpath(__file__)
 
 #修改默认路径
 os.chdir(os.path.split(os.path.realpath(__file__))[0])
+#print(path)
 #print(os.popen('pwd').read())
 
 #设置日志格式
@@ -31,7 +32,10 @@ baseParams=config.configObject()
 baseParams=baseParams.getConf()
 
 #线程池
-threadList={}
+threadList={
+            'test':'',
+            'deployAntWar' :''           
+             }
 
 #系统字典
 systemDict={'main':
