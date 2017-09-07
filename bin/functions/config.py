@@ -31,9 +31,19 @@ class configObject(object):
         self.configStatic={
                            'pidFile':'../conf/aom.pid',
                            'IPCFile':'../tmp/ipc',
+                           'tcpaddr':'tcp://127.0.0.1:5555',
+                           'checktcpaddr':('127.0.0.1',5555),
                            'help':{'help':{'da.py $parameter':[
                                            'da.py start    *Start the process',
                                            'da.py stop     *Stop the process',
                                            'da.py restart  *Restart the process',
                                            'da.py status   *Check the process status']}},
+                                           
+                           'dbcon': {
+                                   'host':'test205',
+                                   'port':3306,
+                                   'user':'root',
+                                   'password':'jljtmysql',
+                                   'database':'aom',
+                                   'charset':'utf8' }
                           }

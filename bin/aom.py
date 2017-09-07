@@ -4,6 +4,7 @@ import subprocess
 import sys,os,time
 import zmq
 import threading
+import socket
 import yaml
 import psutil
 import logging
@@ -27,6 +28,7 @@ warLogger = logging.getLogger("warLog")
 
 from functions import test1
 from functions import deploy
+from functions import task
 #获取基础参数
 baseParams=config.configObject()
 baseParams=baseParams.getConf()
@@ -34,7 +36,8 @@ baseParams=baseParams.getConf()
 #线程池
 threadList={
             'test':'',
-            'deployAntWar' :''           
+            'deployAntWar' :'' ,
+            'task':''            
              }
 
 #系统字典
@@ -42,20 +45,26 @@ systemDict={'main':
                   {'target':'on','state':'on'},
             'thread':{
                       'test':{
-                              'switch':{'target':'on','state':'on'},
+                              'switch':{'target':'off','state':'off'},
                               'threadStatus':'',
                              },
                        'deployAntWar':{
                               'switch':{'target':'on','state':'on'},
                               'threadStatus':'',
-                             }      
+                             } , 
+                        'task':{
+                                'switch':{'target':'on','state':'on'},
+                                'threadStatus':'',
+                                } ,                            
                      },
             }
 
-#ipc通讯接口
+#通讯工作线程
 class IPCInterface(threading.Thread):
-    def __init__(self):
+    def __init__(self,worker_url, context):
         threading.Thread.__init__(self)
+        self.worker_url=worker_url
+        self.context=context
         self.flag=True
         self.daemon = True
         self.start()
@@ -70,26 +79,34 @@ class IPCInterface(threading.Thread):
         
     
     def _run(self):
+        socket = self.context.socket(zmq.REP)   
+        socket.connect(self.worker_url)
         while 1:
-            if self.flag:
-                self._ipcFun()
+            if self.flag:     
+                self._ipcFun(socket)
             else:
                 break
     
-    def _ipcFun(self):
-        context = zmq.Context()
-        socket = context.socket(zmq.REP)
-        rc = socket.bind("ipc://"+baseParams['IPCFile'])
+    def _ipcFun(self,socket):
+
+        
         message = socket.recv_json()
         if message['action']=='status':
-            systemDict['thread']['test']['threadStatus']=threadList['test'].isAlive() 
+            #systemDict['thread']['test']['threadStatus']=threadList['test'].isAlive() 
             systemDict['thread']['deployAntWar']['threadStatus']=threadList['deployAntWar'].isAlive() 
+            systemDict['thread']['task']['threadStatus']=threadList['task'].isAlive() 
             socket.send_json({'data':{"server response! PID:"+str(os.getpid()):systemDict}})
         elif message['action']=='stop':  
             self.flag=False
             self._checkProcessEnd()
             socket.send_json({'data':'Process stop completion.'})
-            systemDict['main']['target']='off'                   
+            systemDict['main']['target']='off' 
+
+        elif message['action']=='forcestop':   
+            self.flag=False        
+            socket.send_json({'data':'Process forcestop completion.'})
+            #time.sleep(5)
+            systemDict['main']['target']='off' 
         elif message['action']=='start':
             socket.send_json({'data':"Start to finish,pid:"+str(os.getpid())})
         elif message['action']=='addlog':
@@ -98,7 +115,7 @@ class IPCInterface(threading.Thread):
         else:
             socket.send_json({'data':'unknow parameter'})
 
-    
+        
 #给所有线程下关闭指令 检测所有线程是否停止    
     def _checkProcessEnd(self):
         for i in systemDict['thread']:
@@ -110,7 +127,7 @@ class IPCInterface(threading.Thread):
                     break
                 time.sleep(1)
 
- #测试进程               
+ #测试线程            
 class test(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
@@ -121,10 +138,9 @@ class test(threading.Thread):
         try:
             self._run()
         except Exception as info:
-            test1.ddd()
+            systemDict['main']['target']='off'  
             stdLogger.error(traceback.format_exc())
-            stdLogger.error('The thread test collapse')
-            systemDict['thread']['test']['switch']['state']='off'
+            stdLogger.error('The thread startIPCInterface collapse')
             
     def _run(self):
         while 1:
@@ -135,7 +151,35 @@ class test(threading.Thread):
             a=b+c
             time.sleep(1)   
     
+#通讯启动线程
+class startIPCInterface(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.daemon = True
+        self.start()
+        
+    def run(self): 
+        try:
+            self._run()
+        except Exception as info:
+            systemDict['main']['target']='off'  
+            stdLogger.error(traceback.format_exc())
+            stdLogger.error('The thread startIPCInterface collapse')
 
+    
+    def _run(self):
+        url_worker = "inproc://workers"  
+        url_client = baseParams['tcpaddr']
+        context = zmq.Context(1) 
+        clients = context.socket(zmq.XREP)   
+        clients.bind(url_client)   
+       
+        workers = context.socket(zmq.XREQ)   
+        workers.bind(url_worker) 
+        for i in range(5):
+            t=IPCInterface(url_worker, context)
+        zmq.device(zmq.QUEUE, clients, workers) 
+        
 #守护进程    
 class serverDaemon(object): 
     def __init__(self):
@@ -144,16 +188,23 @@ class serverDaemon(object):
         
     def run(self):   
         stdLogger.info("Start to finish,pid:"+str(os.getpid()))
-        t=IPCInterface()
-        t1=test()
-        threadList['test']=t1
+        #启动通讯线程
+        t=startIPCInterface()
+        
         dAW=deploy.deployAntWar(**{'threadList':threadList,'systemDict':systemDict})
         threadList['deployAntWar']=dAW
+        
+        #启动任务处理线程
+        taskThread=task.taskThreadObj(**{'threadList':threadList,'systemDict':systemDict,'baseParams':baseParams})
+        threadList['task']=taskThread
+        stdLogger.debug('wanshi')
         while 1:
             if systemDict['main']['target']=='off':
                 stdLogger.info('Process stop completion.')
                 break
             time.sleep(1)
+    
+
 
 #服务端初始化
 class serverInit(object):
@@ -171,6 +222,8 @@ class serverInit(object):
         elif self.param[1]=='status':
             self._status({'action':self.param[1],'data':''})
         elif self.param[1]=='stop':
+            self._stop({'action':self.param[1],'data':''})
+        elif self.param[1]=='forcestop':
             self._stop({'action':self.param[1],'data':''})
         elif self.param[1]=='restart':
             self._stop({'action':'stop','data':''})
@@ -225,7 +278,8 @@ class serverInit(object):
         context = zmq.Context()
         socket = context.socket(zmq.REQ)
         socket.setsockopt(zmq.LINGER, 0) 
-        socket.connect("ipc://"+baseParams['IPCFile'])
+        #socket.connect("ipc://"+baseParams['IPCFile'])
+        socket.connect(baseParams['tcpaddr'])
         socket.send_json(flag)
         poller = zmq.Poller()  
         poller.register(socket, zmq.POLLIN)  
@@ -235,15 +289,20 @@ class serverInit(object):
             return('The process has no response')
             #raise IOError("Timeout processing auth request")             
     
+    #帮助
     def _help(self):
         msg= baseParams['help']      
         return(yaml.dump(msg,default_flow_style=False))
     
+    #判断端口是否被占用
     def _ipcExists(self):
-        if os.path.exists(baseParams['IPCFile']):
-            return(True)
-        else:
-            return(False)
+        s=socket.socket()       #建立soket对象
+        s.settimeout(2)   #设置超时时间
+        try:
+            s.connect(baseParams['checktcpaddr'])#连接目标
+            return True
+        except Exception,e:
+            return False
     
 if __name__ == '__main__':
     run=serverInit(sys.argv)
