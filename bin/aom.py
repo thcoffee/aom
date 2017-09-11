@@ -37,7 +37,8 @@ baseParams=baseParams.getConf()
 threadList={
             'test':'',
             'deployAntWar' :'' ,
-            'task':''            
+            'task':'' ,
+            'taskSub':''            
              }
 
 #系统字典
@@ -46,7 +47,7 @@ systemDict={'main':
             'thread':{
                       'test':{
                               'switch':{'target':'off','state':'off'},
-                              'threadStatus':'',
+                              'threadStatus':{},
                              },
                        'deployAntWar':{
                               'switch':{'target':'on','state':'on'},
@@ -55,6 +56,7 @@ systemDict={'main':
                         'task':{
                                 'switch':{'target':'on','state':'on'},
                                 'threadStatus':'',
+                                'subThread':{}
                                 } ,                            
                      },
             }
@@ -95,7 +97,10 @@ class IPCInterface(threading.Thread):
             #systemDict['thread']['test']['threadStatus']=threadList['test'].isAlive() 
             systemDict['thread']['deployAntWar']['threadStatus']=threadList['deployAntWar'].isAlive() 
             systemDict['thread']['task']['threadStatus']=threadList['task'].isAlive() 
+            for i in systemDict['thread']['task']['subThread']:
+                systemDict['thread']['task']['subThread'][i]['threadStatus']=threadList['taskSub'][i].isAlive()            
             socket.send_json({'data':{"server response! PID:"+str(os.getpid()):systemDict}})
+
         elif message['action']=='stop':  
             self.flag=False
             self._checkProcessEnd()
@@ -195,9 +200,10 @@ class serverDaemon(object):
         threadList['deployAntWar']=dAW
         
         #启动任务处理线程
-        taskThread=task.taskThreadObj(**{'threadList':threadList,'systemDict':systemDict,'baseParams':baseParams})
+        taskThread=task.taskThreadStartObj(**{'threadList':threadList,
+                                              'systemDict':systemDict,
+                                              'baseParams':baseParams})
         threadList['task']=taskThread
-        stdLogger.debug('wanshi')
         while 1:
             if systemDict['main']['target']=='off':
                 stdLogger.info('Process stop completion.')
