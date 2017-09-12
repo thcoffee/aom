@@ -26,38 +26,32 @@ logging.config.fileConfig("../conf/logging.conf")
 stdLogger = logging.getLogger("root")
 warLogger = logging.getLogger("warLog")
 
-from functions import test1
 from functions import deploy
 from functions import task
+from functions import basic
 #获取基础参数
 baseParams=config.configObject()
 baseParams=baseParams.getConf()
 
 #线程池
 threadList={
-            'test':'',
-            'deployAntWar' :'' ,
-            'task':'' ,
-            'taskSub':''            
+            #'test':'',
+            #'deployAntWar' :'' ,
+            #'task':'' ,
+            #'taskSub':''            
              }
 
 #系统字典
 systemDict={'main':
                   {'target':'on','state':'on'},
             'thread':{
-                      'test':{
-                              'switch':{'target':'off','state':'off'},
-                              'threadStatus':{},
-                             },
+                    #  'test':{
+                    #          'switch':{'target':'off','state':'off'},
+                    #          'threadStatus':{},
+                    #         },
                        'deployAntWar':{
-                              'switch':{'target':'on','state':'on'},
                               'threadStatus':'',
-                             } , 
-                        'task':{
-                                'switch':{'target':'on','state':'on'},
-                                'threadStatus':'',
-                                'subThread':{}
-                                } ,                            
+                             } ,                            
                      },
             }
 
@@ -93,25 +87,23 @@ class IPCInterface(threading.Thread):
 
         
         message = socket.recv_json()
-        if message['action']=='status':
-            #systemDict['thread']['test']['threadStatus']=threadList['test'].isAlive() 
-            systemDict['thread']['deployAntWar']['threadStatus']=threadList['deployAntWar'].isAlive() 
-            systemDict['thread']['task']['threadStatus']=threadList['task'].isAlive() 
-            for i in systemDict['thread']['task']['subThread']:
-                systemDict['thread']['task']['subThread'][i]['threadStatus']=threadList['taskSub'][i].isAlive()            
+        if message['action']=='status':           
             socket.send_json({'data':{"server response! PID:"+str(os.getpid()):systemDict}})
 
         elif message['action']=='stop':  
             self.flag=False
+            systemDict['main']['target']='off'
             self._checkProcessEnd()
+            stdLogger.info('check Process completion.')  
             socket.send_json({'data':'Process stop completion.'})
-            systemDict['main']['target']='off' 
+            systemDict['main']['state']='off' 
+            
 
         elif message['action']=='forcestop':   
             self.flag=False        
             socket.send_json({'data':'Process forcestop completion.'})
             #time.sleep(5)
-            systemDict['main']['target']='off' 
+            systemDict['main']['state']='off' 
         elif message['action']=='start':
             socket.send_json({'data':"Start to finish,pid:"+str(os.getpid())})
         elif message['action']=='addlog':
@@ -123,38 +115,15 @@ class IPCInterface(threading.Thread):
         
 #给所有线程下关闭指令 检测所有线程是否停止    
     def _checkProcessEnd(self):
-        for i in systemDict['thread']:
-            systemDict['thread'][i]['switch']['target']='off'
           
-        for j in systemDict['thread']:
+        for j in threadList.keys():
             for x in range(360):
-                if systemDict['thread'][j]['switch']['state']=='off':
+                if threadList[j].isAlive() is not True or j=='refreshSystemDict':
                     break
                 time.sleep(1)
 
- #测试线程            
-class test(threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)
-        self.daemon=True
-        self.start()
- 
-    def run(self):
-        try:
-            self._run()
-        except Exception as info:
-            systemDict['main']['target']='off'  
-            stdLogger.error(traceback.format_exc())
-            stdLogger.error('The thread startIPCInterface collapse')
-            
-    def _run(self):
-        while 1:
-            if systemDict['thread']['test']['switch']['target']=='off':
-                systemDict['thread']['test']['switch']['state']='off'
-                stdLogger.info('The thread test has stopped.')
-                break
-            a=b+c
-            time.sleep(1)   
+
+  
     
 #通讯启动线程
 class startIPCInterface(threading.Thread):
@@ -196,16 +165,23 @@ class serverDaemon(object):
         #启动通讯线程
         t=startIPCInterface()
         
-        dAW=deploy.deployAntWar(**{'threadList':threadList,'systemDict':systemDict})
-        threadList['deployAntWar']=dAW
-        
+        threadList['deployAntWar']=deploy.deployAntWar(**{'threadList':threadList,'systemDict':systemDict})
+               
         #启动任务处理线程
         taskThread=task.taskThreadStartObj(**{'threadList':threadList,
                                               'systemDict':systemDict,
                                               'baseParams':baseParams})
-        threadList['task']=taskThread
+        
+        #刷新系统字典
+        threadList['refreshSystemDict']=basic.refreshSystemDictObject(**{'threadList':threadList,
+                                                                         'systemDict':systemDict,
+                                                                         'baseParams':baseParams,
+                                                                         'name':'refreshSystemDict'})
+        systemDict['thread']['refreshSystemDict']={}                                                                        
+        systemDict['thread']['refreshSystemDict']['threadStatus']=None
         while 1:
-            if systemDict['main']['target']=='off':
+            
+            if systemDict['main']['state']=='off':
                 stdLogger.info('Process stop completion.')
                 break
             time.sleep(1)
@@ -292,7 +268,7 @@ class serverInit(object):
         if poller.poll(360*1000): # 10s timeout in milliseconds     
             return (socket.recv_json())
         else:  
-            return('The process has no response')
+            return({'data':'The process has no response'})
             #raise IOError("Timeout processing auth request")             
     
     #帮助

@@ -1,6 +1,5 @@
 import sys,os,time
 import threading
-import yaml
 import logging
 import traceback
 import pymysql
@@ -33,15 +32,15 @@ class taskThreadObj(threading.Thread):
             self._run()
         except Exception as info:
             stdLogger.error(traceback.format_exc())
-            stdLogger.error('The thread task collapse')
-            self.systemDict['thread']['task']['subThread'][self.name]['switch']['state']='off'
+            stdLogger.error('The thread '+self.name+' collapse')
+
             
     def _run(self):
         stdLogger.error('The thread '+self.name+' Start to finish')
         while 1:
-            if self.systemDict['thread']['task']['switch']['target']=='off':
-                self.systemDict['thread']['task']['subThread'][self.name]['switch']['state']='off'
+            if self.systemDict['main']['target']=='off': 
                 stdLogger.info(self.name+' thread has stopped.')
+                break
             if self._connect():
                 cur=self.db.cursor() 
                 cur.execute('select * from aom_custom')
@@ -66,26 +65,14 @@ class taskThreadStartObj(threading.Thread):
         except Exception as info:
             stdLogger.error(traceback.format_exc())
             stdLogger.error('The thread task collapse')
-            self.systemDict['thread']['task']['switch']['state']='off'
             
     def _run(self):
         stdLogger.error('The thread task Start to finish')
-        self.threadList['taskSub']={}
         for i in range(3):
-            self.threadList['taskSub']['task'+str(i)]=taskThreadObj(**{'threadList':self.threadList,
-                                                                       'systemDict':self.systemDict,
-                                                                       'baseParams':self.baseParams,
-                                                                       'name':'task'+str(i)})
-            self.systemDict['thread']['task']['subThread']['task'+str(i)]={'switch':{'state': 'on','target': 'on'}}
+            self.threadList['task'+str(i)]=taskThreadObj(**{'threadList':self.threadList,
+                                                            'systemDict':self.systemDict,
+                                                            'baseParams':self.baseParams,
+                                                            'name':'task'+str(i)})
+            self.systemDict['thread']['task'+str(i)]={}
+
             
-        while 1:
-            if self.ifTaskSub():
-                self.systemDict['thread']['task']['switch']['state']='off' 
-                stdLogger.info('task thread has stopped.')                 
-            time.sleep(1)
-            
-    def ifTaskSub(self):
-        for i in self.systemDict['thread']['task']['subThread']:
-            if self.systemDict['thread']['task']['subThread'][i]['switch']['state']=='on':
-                return(False)
-        return(True)

@@ -22,12 +22,10 @@ class deployAntWar(threading.Thread):
         except Exception as info:
             stdLogger.error(traceback.format_exc())
             stdLogger.error('The thread deployAntWar collapse')
-            self.systemDict['thread']['deployAntWar']['switch']['state']='off'
     
     def _run(self):
         while 1:
-            if self.systemDict['thread']['deployAntWar']['switch']['target']=='off':
-                self.systemDict['thread']['deployAntWar']['switch']['state']='off'
+            if self.systemDict['main']['target']=='off':
                 stdLogger.info('The thread deployAntWar has stopped.')
-                break
+                break  
             time.sleep(1)
