@@ -35,5 +35,10 @@ class  refreshSystemDictObject(threading.Thread):
     
     def _refreshSystemDict(self):
         for i in self.threadList.keys():
-            self.systemDict['thread'][i]['threadStatus']=self.threadList[i].isAlive()
+            if i=='task':
+                for j in self.threadList[i].keys():
+                    self.systemDict['thread'][i][j]['threadStatus']=self.threadList[i][j].isAlive()                 
+            else:
+                self.systemDict['thread'][i]['threadStatus']=self.threadList[i].isAlive()
         
+     

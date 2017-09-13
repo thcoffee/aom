@@ -1,7 +1,7 @@
 import yaml,os
 import logging 
 import logging.config
-
+import pymysql.cursors 
 class configObject(object):
     def __init__(self):
         self.filename='../conf/base.yaml'
@@ -45,5 +45,7 @@ class configObject(object):
                                    'user':'root',
                                    'password':'jljtmysql',
                                    'database':'aom',
-                                   'charset':'utf8' }
+                                   'charset':'utf8' ,
+                                   'cursorclass':pymysql.cursors.DictCursor,
+                                   }
                           }

@@ -114,14 +114,23 @@ class IPCInterface(threading.Thread):
 
         
 #给所有线程下关闭指令 检测所有线程是否停止    
-    def _checkProcessEnd(self):
-          
-        for j in threadList.keys():
-            for x in range(360):
-                if threadList[j].isAlive() is not True or j=='refreshSystemDict':
-                    break
-                time.sleep(1)
+    def _checkProcessEnd(self): 
+        for x in range(360):    
+            if self.ifProcessEnd():
+                break
+            time.sleep(1)
 
+    def ifProcessEnd(self):        
+        for j in threadList.keys():
+            if j=='task':
+                for i in threadList[j].keys():
+                    if threadList[j][i].isAlive():
+                        return(False)
+            elif j=='refreshSystemDict':
+                continue                
+            elif threadList[j].isAlive():
+                return(False)
+        return(True)
 
   
     
@@ -165,6 +174,9 @@ class serverDaemon(object):
         #启动通讯线程
         t=startIPCInterface()
         
+        #test
+        systemDict['thread']['deployAntWar']={}                                                                       
+        systemDict['thread']['deployAntWar']['threadStatus']=False 
         threadList['deployAntWar']=deploy.deployAntWar(**{'threadList':threadList,'systemDict':systemDict})
                
         #启动任务处理线程
@@ -173,12 +185,13 @@ class serverDaemon(object):
                                               'baseParams':baseParams})
         
         #刷新系统字典
+        systemDict['thread']['refreshSystemDict']={}                                                                       
+        systemDict['thread']['refreshSystemDict']['threadStatus']=False
         threadList['refreshSystemDict']=basic.refreshSystemDictObject(**{'threadList':threadList,
                                                                          'systemDict':systemDict,
                                                                          'baseParams':baseParams,
                                                                          'name':'refreshSystemDict'})
-        systemDict['thread']['refreshSystemDict']={}                                                                        
-        systemDict['thread']['refreshSystemDict']['threadStatus']=None
+        
         while 1:
             
             if systemDict['main']['state']=='off':
