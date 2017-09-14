@@ -10,8 +10,8 @@ client=salt.client.LocalClient()
 #b={'tgt':['test208','test207','test254'],'fun':'appserver.getdate','expr_form':'list','batch':'80%',}
 #b={'tgt':'test207','fun':'state.sls','arg':['sls.test']}
 #b={'tgt':'*','fun':'appserver.zu','arg':[{'name':'tom'}]}
-b={'tgt':'*','fun':'cmd.run','arg':['ls -l']}
-#b={'tgt':'*','fun':'appserver.zu','kwarg':{'name':'zu'}}
+#={'tgt':'*','fun':'cmd.run','arg':['ls -l']}
+b={'tgt':'*','fun':'appserver.zu','kwarg':{'name':'zu'}}
 a=client.cmd(**b)
 #a=client.cmd_batch(**b)
 #c=client.cmd_async(**b)
@@ -21,5 +21,6 @@ a=client.cmd(**b)
 #    print yaml.dump(a,default_flow_style=False)
 #    time.sleep(2)
 print(yaml.dump(a,default_flow_style=False)) 
+print(a)
 #for i in a:
 #    print 'neirong:',yaml.dump(i,default_flow_style=False)

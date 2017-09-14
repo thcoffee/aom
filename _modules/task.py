@@ -5,7 +5,6 @@ import traceback
 import pymysql
 
 from functions import test1
-from functions import installSoftWare
 
 stdLogger = logging.getLogger('root')
 
@@ -45,20 +44,16 @@ class taskThreadObj(threading.Thread):
         cur.execute("select * from aom_task_before where taskstatus=1 for update")
         data=cur.fetchall()
         for i in data:
-            
-            cur.execute('update aom_task_before set taskstatus=2 where taskid=%s'%(i['taskid']))
-            db.commit()
-            stdLogger.debug("".join([self.name,str(i)]))                    
-            self.systemDict['thread']['task'][self.name]['taskId']=i['taskid']
             if i['tasktype']==u'test1':
+                cur.execute('update aom_task_before set taskstatus=2 where taskid=%s'%(i['taskid']))
+                db.commit()
+                stdLogger.debug("".join([self.name,str(i)]))                    
+                self.systemDict['thread']['task'][self.name]['taskId']=i['taskid']
                 t=test1.test1(**i)
                 t.run() 
-            elif i['tasktype']==u'installjdk':
-                t=installSoftWare.jdk(**i)
-                t.install()
-            stdLogger.debug("".join([self.name,' ',str(i['taskid']),' Processed.']))
-            self.systemDict['thread']['task'][self.name]['taskId']=None
-            break
+                stdLogger.debug("".join([self.name,' ',str(i['taskid']),' Processed.']))
+                self.systemDict['thread']['task'][self.name]['taskId']=None
+                break
                 
                    
         cur.close()

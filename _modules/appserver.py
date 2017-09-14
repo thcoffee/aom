@@ -1,13 +1,19 @@
 import os,time
 import salt.client
 import dayin
+import salt.config
+import salt.loader
+
 def getpid(msg):
     time.sleep(10)
     return(msg+str(os.getpid()))
 
 def zu(**msg):
-    return(msg['name'])
-    
+    #__opts__ = salt.config.minion_config('/etc/salt/minion')
+   # __grains__ = salt.loader.grains(__opts__)
+   # return({'a':'b','c':['a','b'],'id':__grains__['id']})
+   caller = salt.client.Caller()
+   return({'a':'b','c':['a','b'],'id':caller.sminion.functions['grains.items']('shenme')}) 
 def get_file():
     caller = salt.client.Caller()
     a=caller.cmd('cp.get_file','salt://Python-3.4.6.tgz','/root/Python-3.4.6.tgz')
@@ -35,3 +41,6 @@ def mark(taskid):
 
 def dy():
     return(dayin.dayin())
+
+def getDict(self):
+    return({'date':str(time.time)})
