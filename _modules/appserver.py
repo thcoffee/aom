@@ -3,6 +3,8 @@ import salt.client
 import dayin
 import salt.config
 import salt.loader
+import logging
+stdLogger = logging.getLogger('root')
 
 def getpid(msg):
     time.sleep(10)
@@ -12,8 +14,9 @@ def zu(**msg):
     #__opts__ = salt.config.minion_config('/etc/salt/minion')
    # __grains__ = salt.loader.grains(__opts__)
    # return({'a':'b','c':['a','b'],'id':__grains__['id']})
+   stdLogger.warning('install complite.')
    caller = salt.client.Caller()
-   return({'a':'b','c':['a','b'],'id':caller.sminion.functions['grains.items']('shenme')}) 
+   return({'a':'b','c':['a','b'],'id':caller.sminion.functions['grains.items']()['id']}) 
 def get_file():
     caller = salt.client.Caller()
     a=caller.cmd('cp.get_file','salt://Python-3.4.6.tgz','/root/Python-3.4.6.tgz')
