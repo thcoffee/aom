@@ -54,7 +54,7 @@ class taskThreadObj(threading.Thread):
                 if i['tasktype']==u'test1':
                     t=test1.test1(**i)
                     t.run() 
-                elif i['tasktype']==u'installjdk':
+                elif i['tasktype']==u'installsoft':
                     t=installSoftWare.jdk(**i)
                     t.install()
                 stdLogger.debug("".join([self.name,' ',str(i['taskid']),' Processed.']))
