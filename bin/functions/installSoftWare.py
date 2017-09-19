@@ -4,7 +4,7 @@ import yaml
 stdLogger = logging.getLogger('root')
 class jdk(object):
     '''
-    {'task':'installjdk','remotepath':'/home/deployuser/adcc/software/jdk1','localpath':'/home/deployuser/aom/software/jdk_7u72_linux_64.tar.gz','node':['test207']}
+    {'task':'installsoftware','name':'jdk','remotepath':'/home/deployuser/adcc/software/jdk1','localpath':'/home/deployuser/aom/software/jdk_7u72_linux_64.tar.gz','node':['test207']}
     '''
     
     def __init__(self,**kwages):

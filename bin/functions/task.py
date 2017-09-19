@@ -51,12 +51,16 @@ class taskThreadObj(threading.Thread):
                 stdLogger.debug("".join([self.name,str(i)]))                    
                 self.systemDict['thread']['task'][self.name]['taskId']=i['taskid']
                 i['cur'],i['db']=cur,db
+                taskDict=eval(i['taskcontent'])
+                stdLogger.debug(taskDict)
                 if i['tasktype']==u'test1':
                     t=test1.test1(**i)
                     t.run() 
-                elif i['tasktype']==u'installsoft':
-                    t=installSoftWare.jdk(**i)
-                    t.install()
+                elif i['tasktype']==u'installsoftware':
+                    if taskDict['name']=='jdk':
+                        t=installSoftWare.jdk(**i)
+                        t.install()
+               
                 stdLogger.debug("".join([self.name,' ',str(i['taskid']),' Processed.']))
                 self.systemDict['thread']['task'][self.name]['taskId']=None
                 cur.execute('update aom_task_before set taskstatus=3 where taskid=%s'%(i['taskid']))
