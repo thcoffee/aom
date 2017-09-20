@@ -5,9 +5,9 @@ from . import views
 urlpatterns = [
 url(r'^test/$', views.test, name='test'),
 url(r'^test1/$', views.test1, name='test1'),
-url(r'^installsoftwarelist/$', views.installsoftwareList, name='installsoftwarelist'),
-url(r'^installsoftwareadd/$', views.installsoftwareAdd, name='installsoftwareadd'),
+url(r'^installsoftlist/$', views.installsoftList, name='installsoftlist'),
+url(r'^installjdkadd/$', views.installjdkAdd, name='installjdkadd'),
 url(r'^jdkcommit/$', views.jdkcommit, name='jdkcommit'),
-url(r'^installsoftwareinfo/$', views.installsoftwareinfo, name='installsoftwareinfo'),
+url(r'^installsoftinfo/$', views.installsoftinfo, name='installsoftinfo'),
 url(r'^logout/$', views1.LogoutView.as_view(), name='logout')
 ]

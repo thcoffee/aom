@@ -1,0 +1,65 @@
+{%extends "aom/base.html"%}
+{% block content %}
+
+<div class="container " >
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-md-10">
+                            <h3 class="panel-title">安装软件列表1</h3>
+                        </div>
+                        <div class="col-md-2">
+                            <button onclick="javascrtpt:window.location.href='../installsoftwareadd'"  type="button" class="btn btn-default pull-right">新增任务</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                            {% for i in objects_head %}
+                            <th>{{i}}</th>
+                            {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in objects %}
+                            <tr>
+                                {% for j in i %}
+                                <td>{{j}}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>             
+                    </table>   
+                                
+                    <ul class="pagination">
+                        {% if objects.has_previous %}
+                        <li><a href="?page={{ objects.previous_page_number }}">前一页</a></li>
+                        {% else %}
+                        <li class="active"><a>前一页</a></li>
+                        {% endif %}
+                    
+                        {% for p in page_range %}
+                            {% ifequal p objects.number %}
+                            <li class="active"><a>{{p}}</a></li>
+                            {% else %}
+                            <li><a href="?page={{p}}" title="第{{p}}页">{{p}}</a><li>
+                            {% endifequal %}
+                        {% endfor %}
+                    
+                        {% if objects.has_next %}
+                        <li><a href="?page={{ objects.next_page_number }}">后一页</a></li>
+                        {% else %}
+                        <li class="active"> <a>后一页</a></li>
+                        {% endif %}
+                    </ul>
+                </div>                              
+            </div>
+        </div>    
+    </div>
+</div>
+  
+{% endblock %}
