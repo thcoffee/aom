@@ -36,7 +36,10 @@ class taskThreadObj(threading.Thread):
             if self.systemDict['main']['target']=='off': 
                 stdLogger.info(self.name+' thread has stopped.')
                 break
-            self.processTask()
+            try:
+                self.processTask()
+            except Exception as info:
+                stdLogger.error(traceback.format_exc())
             time.sleep(5)
         
     def processTask(self):
