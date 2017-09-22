@@ -36,3 +36,6 @@ class opMysqlObj(object):
         for i in self.getData(**{'sql':'select nodeid from aom_node'}):
             temp.append(i[0])
         return(temp)
+        
+    def getDefaultPath(self,**kwages):
+        return(self.getData(**{'sql':'select defaultpath from aom_softtype where softtypeid=%s'%(kwages['softtypeid'])})[0][0])

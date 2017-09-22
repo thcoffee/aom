@@ -9,5 +9,6 @@ url(r'^installsoftlist/$', views.installsoftList, name='installsoftlist'),
 url(r'^installjdkadd/$', views.installjdkAdd, name='installjdkadd'),
 url(r'^jdkcommit/$', views.jdkcommit, name='jdkcommit'),
 url(r'^installsoftinfo/$', views.installsoftinfo, name='installsoftinfo'),
+url(r'^postData/$', views.postData, name='postData'),
 url(r'^logout/$', views1.LogoutView.as_view(), name='logout')
 ]

@@ -4,6 +4,8 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required 
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
+from django.views.decorators.csrf import csrf_exempt
+import json
 #导入数据库操作模块
 from . import db
 
@@ -91,10 +93,11 @@ def jdkcommit(request):
         return HttpResponse("参数错误")
     sql="SELECT softfiles FROM aom_softtype where softTYPEID="+request.POST.get('softversion',1)
     d=db.opMysqlObj(**{'dbname':'default'})
+    print(request.POST.getlist('nodeselect'))
     data={'task':'installsoftware',
           'localpath':d.getData(sql=sql)[0][0],
           'remotepath':request.POST.get('remotepath',''),
-          'name':'jdk','node':request.POST.getlist('node')}
+          'name':'jdk','node':request.POST.getlist('nodeselect')}
     
     d.putData(sql="INSERT INTO aom_task_before (taskdate,tasktype,userid,taskstatus,taskcontent) VALUES (NOW(),'installsoftware',1,1,\"%s\")" %(str(data)))
     d.putData(sql="insert into aom_task_soft (taskid,softTYPEID)values (%s,%s)"%(d.getLaseID(),request.POST.get('softversion',1)))
@@ -117,8 +120,23 @@ def installsoftinfo(request):
     data['objects']=objects
     data['page_range']=page_range
     data['objects_head']=objects_head
-    
-    
     return render(request, 'aom/installsoftinfo.html',data) 
+
+@csrf_exempt    
+def postData(request):
+    if request.method != "POST":
+        return HttpResponse("参数错误")
+    #print(request.POST.get('softversion'))
+    return_json={'result':'error'}
+    if request.POST.get('page')=='installjdkadd':
+        if request.POST.get('type')=='defautlpath':    
+            return_json = {'result':{'defaultpath':_getDefaultpath(request.POST.get('softversion'))}}   
+    #print(return_json)            
+    return HttpResponse(json.dumps(return_json), content_type='application/json')        
+
+def _getDefaultpath(softtypeid):
+    dbcon=db.opMysqlObj(**{'dbname':'default'})
+    return(dbcon.getDefaultPath(**{'softtypeid':softtypeid}))
+    
 def test1(request):
     return render(request, 'aom/head.html',{})
