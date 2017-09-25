@@ -5,10 +5,16 @@ from . import views
 urlpatterns = [
 url(r'^test/$', views.test, name='test'),
 url(r'^test1/$', views.test1, name='test1'),
+#安装软件列表
 url(r'^installsoftlist/$', views.installsoftList, name='installsoftlist'),
+#安装jdk表单
 url(r'^installjdkadd/$', views.installjdkAdd, name='installjdkadd'),
+#jdk提交程序
 url(r'^jdkcommit/$', views.jdkcommit, name='jdkcommit'),
+#安装软件相信信息
 url(r'^installsoftinfo/$', views.installsoftinfo, name='installsoftinfo'),
+#post接口
 url(r'^postData/$', views.postData, name='postData'),
+#注销
 url(r'^logout/$', views1.LogoutView.as_view(), name='logout')
 ]
