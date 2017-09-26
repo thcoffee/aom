@@ -91,11 +91,13 @@ def installjdkAdd(request):
 def jdkcommit(request):
     if request.method != "POST":
         return HttpResponse("参数错误")
-    sql="SELECT softfiles FROM aom_softtype where softTYPEID="+request.POST.get('softversion',1)
+    sql="SELECT softpath,softfiles FROM aom_softtype where softTYPEID="+request.POST.get('softversion',1)
     d=db.opMysqlObj(**{'dbname':'default'})
-    print(request.POST.getlist('nodeselect'))
+    #print(request.POST.getlist('nodeselect'))
+    localpathfiles=d.getData(sql=sql)
     data={'task':'installsoftware',
-          'localpath':d.getData(sql=sql)[0][0],
+          'localpath':localpathfiles[0][0],
+          'localfiles':localpathfiles[0][1],
           'remotepath':request.POST.get('remotepath',''),
           'name':'jdk','node':request.POST.getlist('nodeselect')}
     
@@ -105,6 +107,36 @@ def jdkcommit(request):
     d.close()
     return HttpResponseRedirect("/aom/installsoftlist/")  
 
+#安装jdk表单
+def installnginxAdd(request):
+    data=_initPage(request)
+    sql="SELECT softtypeid,softname,softversion FROM aom_softtype where softname='nginx' ORDER BY 2,3;"
+    dbcon=db.opMysqlObj(**{'dbname':'default'})
+    data['softinfo']= dbcon.getData(**{'sql':sql})
+    data['nodes']= dbcon.getNodes()
+    dbcon.close()
+    return render(request, 'aom/installnginxadd.html',data) 
+
+#接收安装jdk表单提交
+def nginxcommit(request):
+    if request.method != "POST":
+        return HttpResponse("参数错误")
+    sql="SELECT softpath,softfiles FROM aom_softtype where softTYPEID="+request.POST.get('softversion',1)
+    d=db.opMysqlObj(**{'dbname':'default'})
+    #print(request.POST.getlist('nodeselect'))
+    localpathfiles=d.getData(sql=sql)
+    data={'task':'installsoftware',
+          'localpath':localpathfiles[0][0],
+          'localfiles':localpathfiles[0][1],
+          'remotepath':request.POST.get('remotepath',''),
+          'name':'nginx','node':request.POST.getlist('nodeselect')}
+    print(str(data))
+    d.putData(sql="INSERT INTO aom_task_before (taskdate,tasktype,userid,taskstatus,taskcontent) VALUES (NOW(),'installsoftware',1,1,\"%s\")" %(str(data)))
+    d.putData(sql="insert into aom_task_soft (taskid,softTYPEID)values (%s,%s)"%(d.getLaseID(),request.POST.get('softversion',1)))
+    d.commit()
+    d.close()
+    return HttpResponseRedirect("/aom/installsoftlist/")      
+    
 #安装软件列表相信信息
 def installsoftinfo(request):
     if request.method != "GET":
@@ -114,7 +146,8 @@ def installsoftinfo(request):
     sql="SELECT a.taskid,a.taskdate,f.`softname`,f.`softversion`,c.`username`,d.`taskstatusname` FROM (SELECT taskid,taskdate,tasktype,userid,taskstatus FROM aom_task_before WHERE tasktype='installsoftware' UNION ALL SELECT taskid,taskdate,tasktype,userid,taskstatus FROM aom_task_after WHERE tasktype='installsoftware')  a LEFT JOIN aom_task_type b ON a.tasktype=b.tasktypeid LEFT JOIN auth_user c ON a.userid=c.`id` LEFT JOIN aom_task_status d ON a.taskstatus=d.`taskstatusid` LEFT JOIN aom_task_soft e ON a.taskid=e.`taskid` LEFT JOIN aom_softtype f ON  e.`softtypeid`=f.`softtypeid` where a.taskid="+request.GET.get('taskid',1)+" order by a.taskid desc"
     data['taskinfohead']=['任务ID','任务日期','软件名','软件版本','用户','状态']
     data['taskinfo']=dbcon.getData(**{'sql':sql})
-    sql='''select msgid,msgdate,msgcontent  from aom_msg where taskid='''+request.GET.get('taskid',1)
+    
+    sql='''select msgid,msgdate,REPLACE(REPLACE(msgcontent,'\n','<br>'),' ','&nbsp&nbsp')  from aom_msg where taskid='''+request.GET.get('taskid',1)
     objects, page_range = _my_pagination(request, dbcon.getData(**{'sql':sql}))
     objects_head=['消息id','消息日期','消息内容']
     data['objects']=objects

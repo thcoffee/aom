@@ -11,6 +11,11 @@ url(r'^installsoftlist/$', views.installsoftList, name='installsoftlist'),
 url(r'^installjdkadd/$', views.installjdkAdd, name='installjdkadd'),
 #jdk提交程序
 url(r'^jdkcommit/$', views.jdkcommit, name='jdkcommit'),
+#安装jdk表单
+url(r'^installnginxadd/$', views.installnginxAdd, name='installnginxadd'),
+#jdk提交程序
+url(r'^nginxcommit/$', views.nginxcommit, name='nginxcommit'),
+
 #安装软件相信信息
 url(r'^installsoftinfo/$', views.installsoftinfo, name='installsoftinfo'),
 #post接口

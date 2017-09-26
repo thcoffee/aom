@@ -46,7 +46,7 @@
                             {% for i in objects %}
                             <tr>
                                 {% for j in i %}
-                                   <td>{{j}}</td>
+                                   <td>{{j|safe}}</td>
                                 {% endfor %}
                             </tr>
                             {% endfor %}

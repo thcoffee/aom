@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys,os,time
 import threading
 import logging
@@ -63,7 +64,13 @@ class taskThreadObj(threading.Thread):
                     if taskDict['name']=='jdk':
                         t=installSoftWare.jdk(**i)
                         t.install()
-               
+                    elif taskDict['name']=='nginx':
+                        t=installSoftWare.nginx(**i)
+                        t.install()
+                    else:
+                        cur.execute("insert into aom_msg (msgdate,msgtype,msgcontent,taskid)values (now(),1,'%s',%s)" %("不支持该软件安装.",i['taskid']))
+                else:
+                    cur.execute("insert into aom_msg (msgdate,msgtype,msgcontent,taskid)values (now(),1,'%s',%s)" %("未知的任务类型.",i['taskid']))
                 stdLogger.debug("".join([self.name,' ',str(i['taskid']),' Processed.']))
                 self.systemDict['thread']['task'][self.name]['taskId']=None
                 cur.execute('update aom_task_before set taskstatus=3 where taskid=%s'%(i['taskid']))
