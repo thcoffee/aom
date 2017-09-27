@@ -12,7 +12,7 @@ from . import db
 # Create your views here.
 
 #分页
-def _my_pagination(request, queryset, display_amount=10, after_range_num = 3,bevor_range_num = 2):
+def _my_pagination(request, queryset, display_amount=10, after_range_num = 5,bevor_range_num = 4):
     #按参数分页
     paginator = Paginator(queryset, display_amount)
     try:

@@ -66,7 +66,9 @@ class AomAppserverTomcat(models.Model):
     docbase = models.CharField(db_column='docBase', max_length=1024, blank=True, null=True)  # Field name made lowercase.
     appbase = models.CharField(db_column='appBase', max_length=1024, blank=True, null=True)  # Field name made lowercase.
     workdir = models.CharField(db_column='workDir', max_length=1024, blank=True, null=True)  # Field name made lowercase.
-
+    javahome = models.CharField(max_length=1024, blank=True, null=True)
+    javaopts = models.TextField(blank=True, null=True)
+    
     class Meta:
         managed = False
         db_table = 'aom_appserver_tomcat'
@@ -74,16 +76,29 @@ class AomAppserverTomcat(models.Model):
 
 class AomAppserverType(models.Model):
     appserver_type_id = models.AutoField(primary_key=True)
-    appserver_type_name = models.CharField(max_length=50, blank=True, null=True)
-    appserver_type_version = models.CharField(max_length=50, blank=True, null=True)
-    appserver_type_bit = models.CharField(max_length=50, blank=True, null=True)
+    softtypeid = models.ForeignKey('AomSofttype', models.DO_NOTHING, db_column='softtypeid', blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'aom_appserver_type'
     
     def __str__(self):
-        return(",".join([self.appserver_type_name,self.appserver_type_version,self.appserver_type_bit]))
+        return(str(self.softtypeid))
+
+class AomSofttype(models.Model):
+    softtypeid = models.AutoField(primary_key=True)
+    softname = models.CharField(max_length=50, blank=True, null=True)
+    softversion = models.CharField(max_length=50, blank=True, null=True)
+    softpath = models.CharField(max_length=1000, blank=True, null=True)
+    softfiles = models.CharField(max_length=1000, blank=True, null=True)
+    defaultpath = models.CharField(max_length=1000, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'aom_softtype'   
+
+    def __str__(self):
+        return("".join([self.softname,',',self.softversion]))        
 
 class AomCustom(models.Model):
     customid = models.AutoField(primary_key=True)

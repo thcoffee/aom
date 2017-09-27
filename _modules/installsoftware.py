@@ -85,12 +85,16 @@ class _installnginxObj(object):
                 tar.extract(file_name, '/tmp')
             tar.close()
             if os.path.exists('/tmp/nginx'):
-                shellStr="".join(['/tmp/nginx/configure --prefix=',self.remotepath,'&&make&&make install'])
+                shellStr="".join(['cd /tmp/nginx/&&./configure --prefix=',self.remotepath,'&&make&&make install'])
                 rm=subprocess.Popen(shellStr,shell=True,universal_newlines=True,stderr=subprocess.PIPE,stdout=subprocess.PIPE) 
                 stdout=rm.stdout.read()
                 stderr=rm.stderr.read()
                 stdLogger.warning(stdout+stderr)
                 if os.path.exists(self.remotepath):
+                    if os.path.exists(os.path.join('/tmp',self.localfiles)):
+                        os.remove(os.path.join('/tmp',self.localfiles))
+                    if os.path.exists('/tmp/nginx'):
+                        shutil.rmtree('/tmp/nginx')
                     msg.append('nginx安装成功。')
                 else:
                     msg.append('nginx编译安装失败。')   
