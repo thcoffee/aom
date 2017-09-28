@@ -26,14 +26,14 @@ class AomAppserverTomcatAdmin(admin.StackedInline):
     model =  AomAppserverTomcat
 
 class AomAppserverAdmin(admin.ModelAdmin):
+    list_display =('appserver_type','nodeid','path')
     inlines = [AomAppserverTomcatAdmin]
     
 
+    
 admin.site.register(AomCustom)
 admin.site.register(AomProject)
-
 admin.site.register(AomApp,AomAppAdmin)
-
 admin.site.register(AomEnvironment)
 admin.site.register(AomNode)
 admin.site.register(AomOs)

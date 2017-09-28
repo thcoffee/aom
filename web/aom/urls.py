@@ -16,6 +16,11 @@ url(r'^installnginxadd/$', views.installnginxAdd, name='installnginxadd'),
 #jdk提交程序
 url(r'^nginxcommit/$', views.nginxcommit, name='nginxcommit'),
 
+#安装jdk表单
+url(r'^installtomcatadd/$', views.installtomcatAdd, name='installtomcatadd'),
+#jdk提交程序
+url(r'^tomcatcommit/$', views.tomcatcommit, name='tomcatcommit'),
+
 #安装软件相信信息
 url(r'^installsoftinfo/$', views.installsoftinfo, name='installsoftinfo'),
 #post接口

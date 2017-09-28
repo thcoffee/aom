@@ -1,4 +1,5 @@
 from django.db import models
+from . import db
 
 # Create your models here.
 class AomApp(models.Model):
@@ -50,11 +51,27 @@ class AomAppserver(models.Model):
     appserver_type = models.ForeignKey('AomAppserverType', models.DO_NOTHING, blank=True, null=True)
     envid = models.ForeignKey('AomEnvironment', models.DO_NOTHING, db_column='envid', blank=True, null=True)
     nodeid = models.ForeignKey('AomNode', models.DO_NOTHING, db_column='nodeid', blank=True, null=True)
-
+    
+    def path(self):
+        sql="select appservername from aom_appserver_type where appserver_type_id=%s"%(self.appserver_type.appserver_type_id)
+        print(sql)
+        dbcon=db.opMysqlObj(**{'dbname':'default'})
+        apptype=dbcon.getData(**{'sql':sql})
+        if apptype[0][0]=='tomcat':
+            sql="select baseDir from aom_appserver_tomcat where appserverid=%s"%(self.appserverid)
+            temp=dbcon.getData(**{'sql':sql})[0][0]
+        else:
+            temp='Null'
+        dbcon.close()
+        return(temp)
+    
     class Meta:
         managed = False
         db_table = 'aom_appserver'
-    
+        #permissions = (
+        #    ('views_aomappserver_list', '查看学员信息表'),
+        #    ('views_aomappserver_info', '查看学员详细信息'),
+        #)
     def __str__(self):
         return(",".join([str(self.appserver_type),str(self.envid),str(self.nodeid)]))
 
@@ -62,6 +79,8 @@ class AomAppserver(models.Model):
 class AomAppserverTomcat(models.Model):
     appserverid = models.ForeignKey(AomAppserver, models.DO_NOTHING, db_column='appserverid', primary_key=True)
     http_port = models.IntegerField(blank=True, null=True)
+    shutdown_port = models.IntegerField(blank=True, null=True)
+    apj_port = models.IntegerField(blank=True, null=True)
     basedir = models.CharField(db_column='baseDir', max_length=1024, blank=True, null=True)  # Field name made lowercase.
     docbase = models.CharField(db_column='docBase', max_length=1024, blank=True, null=True)  # Field name made lowercase.
     appbase = models.CharField(db_column='appBase', max_length=1024, blank=True, null=True)  # Field name made lowercase.
@@ -72,10 +91,15 @@ class AomAppserverTomcat(models.Model):
     class Meta:
         managed = False
         db_table = 'aom_appserver_tomcat'
-
+        #permissions = (
+        #    ('views_aomappserver_list', '查看学员信息表'),
+        #    ('views_aomappserver_info', '查看学员详细信息'),
+        #)
 
 class AomAppserverType(models.Model):
     appserver_type_id = models.AutoField(primary_key=True)
+    appservername = models.CharField(max_length=50, blank=True, null=True)
+    appserverversion = models.CharField(max_length=50, blank=True, null=True)
     softtypeid = models.ForeignKey('AomSofttype', models.DO_NOTHING, db_column='softtypeid', blank=True, null=True)
 
     class Meta:
@@ -113,7 +137,10 @@ class AomCustom(models.Model):
         
     def __str__(self):
         return(self.customname)
-
+class test(models.Model):
+    tid = models.AutoField(primary_key=True)
+    
+    
 class AomEnvironment(models.Model):
     envid = models.AutoField(primary_key=True)
     envname = models.CharField(max_length=50, blank=True, null=True)
@@ -151,7 +178,7 @@ class AomNode(models.Model):
         db_table = 'aom_node'
 
     def __str__(self):
-        return(self.nodeid+' '+self.ip)
+        return(self.nodeid+':'+self.ip)
 
 class AomOs(models.Model):
     osid = models.IntegerField(primary_key=True)

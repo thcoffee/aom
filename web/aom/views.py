@@ -136,6 +136,38 @@ def nginxcommit(request):
     d.commit()
     d.close()
     return HttpResponseRedirect("/aom/installsoftlist/")      
+
+
+#安装jdk表单
+def installtomcatAdd(request):
+    data=_initPage(request)
+    sql="SELECT softtypeid,softname,softversion FROM aom_softtype where softname='tomcat' ORDER BY 2,3;"
+    dbcon=db.opMysqlObj(**{'dbname':'default'})
+    data['softinfo']= dbcon.getData(**{'sql':sql})
+    data['nodes']= dbcon.getNodes()
+    dbcon.close()
+    return render(request, 'aom/installtomcatadd.html',data) 
+
+#接收安装jdk表单提交
+def tomcatcommit(request):
+    if request.method != "POST":
+        return HttpResponse("参数错误")
+    sql="SELECT softpath,softfiles FROM aom_softtype where softTYPEID="+request.POST.get('softversion',1)
+    d=db.opMysqlObj(**{'dbname':'default'})
+    #print(request.POST.getlist('nodeselect'))
+    localpathfiles=d.getData(sql=sql)
+    data={'task':'installsoftware',
+          'localpath':localpathfiles[0][0],
+          'localfiles':localpathfiles[0][1],
+          'remotepath':request.POST.get('remotepath',''),
+          'name':'nginx','node':request.POST.getlist('nodeselect')}
+    print(str(data))
+    d.putData(sql="INSERT INTO aom_task_before (taskdate,tasktype,userid,taskstatus,taskcontent) VALUES (NOW(),'installsoftware',1,1,\"%s\")" %(str(data)))
+    d.putData(sql="insert into aom_task_soft (taskid,softTYPEID)values (%s,%s)"%(d.getLaseID(),request.POST.get('softversion',1)))
+    d.commit()
+    d.close()
+    return HttpResponseRedirect("/aom/installsoftlist/")   
+
     
 #安装软件列表相信信息
 def installsoftinfo(request):
