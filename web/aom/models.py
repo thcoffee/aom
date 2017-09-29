@@ -84,7 +84,6 @@ class AomAppserverTomcat(models.Model):
     basedir = models.CharField(db_column='baseDir', max_length=1024, blank=True, null=True)  # Field name made lowercase.
     docbase = models.CharField(db_column='docBase', max_length=1024, blank=True, null=True)  # Field name made lowercase.
     appbase = models.CharField(db_column='appBase', max_length=1024, blank=True, null=True)  # Field name made lowercase.
-    workdir = models.CharField(db_column='workDir', max_length=1024, blank=True, null=True)  # Field name made lowercase.
     javahome = models.CharField(max_length=1024, blank=True, null=True)
     javaopts = models.TextField(blank=True, null=True)
     

@@ -67,6 +67,9 @@ class taskThreadObj(threading.Thread):
                     elif taskDict['name']=='nginx':
                         t=installSoftWare.nginx(**i)
                         t.install()
+                    elif taskDict['name']=='tomcat':
+                        t=installSoftWare.tomcat(**i)
+                        t.install()
                     else:
                         cur.execute("insert into aom_msg (msgdate,msgtype,msgcontent,taskid)values (now(),1,'%s',%s)" %("不支持该软件安装.",i['taskid']))
                 else:

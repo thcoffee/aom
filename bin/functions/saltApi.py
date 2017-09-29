@@ -14,7 +14,7 @@ class saltApi(object):
         
     def run(self):
         try:
-            stdLogger.debug(self.input)
+            #stdLogger.debug(self.input)
             client=salt.client.LocalClient()
             return(client.cmd(**self.input))
         except Exception as info:

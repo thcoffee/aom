@@ -9,7 +9,7 @@
                     <h3 class="panel-title">安装tomcat</h3>
                 </div>
                 <div class="panel-body">
-                    <form class="form-horizontal" role="form" action="/aom/nginxcommit/" method="post" name="frm" onsubmit="return check()">
+                    <form class="form-horizontal" role="form" action="/aom/tomcatcommit/" method="post" name="frm" onsubmit="return check()">
                     {% csrf_token %}
                         <div class="form-group">
                            <label class="col-sm-2 control-label" type="text">软件版本：</label>
@@ -62,14 +62,14 @@
                             </div>  
                         </div>  
                         <div class="form-group">
-                            <label for="apjport" class="col-sm-2 control-label">APJ端口：</label>
+                            <label for="ajpport" class="col-sm-2 control-label">AJP端口：</label>
                             <div class="col-sm-1">
-                                <input type="text" class="form-control" id="apjport" name="apjport" value="8009">                      
+                                <input type="text" class="form-control" id="ajpport" name="ajpport" value="8009">                      
                             </div>
                             <div class="col-sm-2">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" id="apjportcheck" name="apjportcheck" >自定义
+                                        <input type="checkbox" id="ajpportcheck" name="ajpportcheck" >自定义
                                     </label>
                                 </div>
                             </div>  
@@ -95,7 +95,7 @@
                             <div class="col-sm-2">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" id="docdircheck" name="docdircheck" >自定义
+                                        <input type="checkbox" id="docbasecheck" name="docbasecheck" >自定义
                                     </label>
                                 </div>
                             </div>  
@@ -103,7 +103,7 @@
                         <div class="form-group">
                             <label for="appbase" class="col-sm-2 control-label">appBase目录：</label>
                             <div class="col-sm-5">
-                                <input type="text" class="form-control" id="appbase" name="appbase">                      
+                                <input type="text" class="form-control" id="appbase" name="appbase" value="/home/deployuser/adcc/software/tomcat/webapps">                      
                             </div>
                             <div class="col-sm-2">
                                 <div class="checkbox">
@@ -113,19 +113,7 @@
                                 </div>
                             </div>  
                         </div>
-                        <div class="form-group">
-                            <label for="workdir" class="col-sm-2 control-label">work目录：</label>
-                            <div class="col-sm-5">
-                                <input type="text" class="form-control" id="workdir" name="workdir" value="/home/deployuser/adcc/software/tomcat/webapps">                      
-                            </div>
-                            <div class="col-sm-2">
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" id="workdircheck" name="workdircheck" >自定义
-                                    </label>
-                                </div>
-                            </div>  
-                        </div>
+                        
                         <div class="form-group">
                             <label for="javahome" class="col-sm-2 control-label">JAVAHOME目录：</label>
                             <div class="col-sm-5">
@@ -140,14 +128,14 @@
                             </div>  
                         </div>
                         <div class="form-group">
-                            <label for="remotepath" class="col-sm-2 control-label">JAVAOPT参数：</label>
+                            <label for="javaopt" class="col-sm-2 control-label">JAVAOPT参数：</label>
                             <div class="col-sm-7">
-                                <textarea class="form-control" id="remotepath" rows="6" name="remotepath" value=""></textarea>                  
+                                <textarea class="form-control" id="javaopt" rows="6" name="javaopt" value="">-Xms1024m -Xmx1024m -Xss512k -XX:SurvivorRatio=1 -XX:PermSize=128m -XX:MaxPermSize=128m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/deployuser/adcc/software/tomcat/logs/ -XX:+DisableExplicitGC -XX:+UseParallelGC -XX:+UseParallelOldGC -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:/home/deployuser/adcc/software/tomcat/logs/gc$(date +"%y.%m.%d%H%M%S").log -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false</textarea>                  
                             </div>
                             <div class="col-sm-2">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" id="custom" name="custom" >自定义
+                                        <input type="checkbox" id="javaoptcheck" name="javaoptcheck" >自定义
                                     </label>
                                 </div>
                             </div>  
@@ -186,6 +174,23 @@ $("#remotepath").attr("readOnly",true);
 customfun($("#remotepath"),$("#custom"))
 $("#httpport").attr("readOnly",true);
 customfun($("#httpport"),$("#httpportcheck"))
+
+$("#shutdownport").attr("readOnly",true);
+customfun($("#shutdownport"),$("#shutdownportcheck"))
+$("#ajpport").attr("readOnly",true);
+customfun($("#ajpport"),$("#ajpportcheck"))
+$("#basedir").attr("readOnly",true);
+customfun($("#basedir"),$("#basedircheck"))
+$("#docbase").attr("readOnly",true);
+customfun($("#docbase"),$("#docbasecheck"))
+$("#appbase").attr("readOnly",true);
+customfun($("#appbase"),$("#appbasecheck"))
+$("#javahome").attr("readOnly",true);
+customfun($("#javahome"),$("#javahomecheck"))
+$("#javaopt").attr("readOnly",true);
+customfun($("#javaopt"),$("#javaoptcheck"))
+
+
 //获取默认目录
 getdefautlpath();
 

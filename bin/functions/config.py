@@ -2,6 +2,12 @@ import yaml,os
 import logging 
 import logging.config
 import pymysql.cursors 
+class updateConfFiles(object):
+    
+    def __init__(self,**kwages):
+        pass
+        
+    
 class configObject(object):
     def __init__(self):
         self.filename='../conf/base.yaml'

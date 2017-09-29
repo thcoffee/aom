@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 import json
+import pymysql
 #导入数据库操作模块
 from . import db
 
@@ -160,9 +161,18 @@ def tomcatcommit(request):
           'localpath':localpathfiles[0][0],
           'localfiles':localpathfiles[0][1],
           'remotepath':request.POST.get('remotepath',''),
-          'name':'nginx','node':request.POST.getlist('nodeselect')}
+          'name':'tomcat',
+          'httpport':request.POST.get('httpport',''),
+          'shutdownport':request.POST.get('shutdownport',''),
+          'ajpport':request.POST.get('ajpport',''),
+          'basedir':request.POST.get('basedir',''),
+          'docbase':request.POST.get('docbase',''),
+          'appbase':request.POST.get('appbase',''),
+          'javahome':request.POST.get('javahome',''),
+          'javaopt':request.POST.get('javaopt',''),
+          'node':request.POST.getlist('nodeselect')}
     print(str(data))
-    d.putData(sql="INSERT INTO aom_task_before (taskdate,tasktype,userid,taskstatus,taskcontent) VALUES (NOW(),'installsoftware',1,1,\"%s\")" %(str(data)))
+    d.putData(sql="INSERT INTO aom_task_before (taskdate,tasktype,userid,taskstatus,taskcontent) VALUES (NOW(),'installsoftware',1,1,\"%s\")" %(pymysql.escape_string(str(data))))
     d.putData(sql="insert into aom_task_soft (taskid,softTYPEID)values (%s,%s)"%(d.getLaseID(),request.POST.get('softversion',1)))
     d.commit()
     d.close()
