@@ -80,7 +80,7 @@ class AomAppserverTomcat(models.Model):
     appserverid = models.ForeignKey(AomAppserver, models.DO_NOTHING, db_column='appserverid', primary_key=True)
     http_port = models.IntegerField(blank=True, null=True)
     shutdown_port = models.IntegerField(blank=True, null=True)
-    apj_port = models.IntegerField(blank=True, null=True)
+    ajp_port = models.IntegerField(blank=True, null=True)
     basedir = models.CharField(db_column='baseDir', max_length=1024, blank=True, null=True)  # Field name made lowercase.
     docbase = models.CharField(db_column='docBase', max_length=1024, blank=True, null=True)  # Field name made lowercase.
     appbase = models.CharField(db_column='appBase', max_length=1024, blank=True, null=True)  # Field name made lowercase.

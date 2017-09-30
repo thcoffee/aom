@@ -5,7 +5,6 @@ import traceback
 import subprocess 
 import tarfile
 import shutil
-from pwd import getpwnam 
 import logging
 stdLogger = logging.getLogger()
 
@@ -35,24 +34,32 @@ class _installjdkObj(object):
             caller = salt.client.Caller()
             a=caller.cmd('cp.get_file',os.path.join('salt://',self.localpath,self.localfiles),os.path.join('/tmp',self.localfiles))
             stdLogger.warning(str(a))
-            tar = tarfile.open(os.path.join('/tmp',self.localfiles), "r:gz")
-            file_names = tar.getnames()
-            for file_name in file_names:
-                tar.extract(file_name, '/tmp')
-            tar.close()
+            self._extractTarFiles()
             if os.path.exists('/tmp/jdk'):
                 shutil.move('/tmp/jdk', self.remotepath)
                 os.system("".join(['chown ',self.user,':',self.group,' -R ',self.remotepath]))
-                if os.path.exists(os.path.join('/tmp',self.localfiles)):
-                    os.remove(os.path.join('/tmp',self.localfiles))
-                if os.path.exists('/tmp/jdk'):
-                    shutil.rmtree('/tmp/jdk')
+                self._removeTempFiles()
                 msg.append(self.remotepath)
                 msg.append('jdk安装成功。')
             else:
                 msg.append('jdk解压失败。')
         return({'msg':"".join(msg),'std':"".join(std)})    
-
+    
+    #解压tar包
+    def  _extractTarFiles(self): 
+        tar = tarfile.open(os.path.join('/tmp',self.localfiles), "r:gz")
+        file_names = tar.getnames()
+        for file_name in file_names:
+            tar.extract(file_name, '/tmp')
+        tar.close()  
+        
+        #移除临时文件    
+    def _removeTempFiles(self):
+        if os.path.exists(os.path.join('/tmp',self.localfiles)):
+            os.remove(os.path.join('/tmp',self.localfiles))
+        if os.path.exists('/tmp/jdk'):
+            shutil.rmtree('/tmp/jdk')
+            
 def installnginx(**kwages):
     try:
         i=_installnginxObj(**kwages)
@@ -81,11 +88,7 @@ class _installnginxObj(object):
             caller = salt.client.Caller()
             a=caller.cmd('cp.get_file',os.path.join('salt://',self.localpath,self.localfiles),os.path.join('/tmp',self.localfiles))
             stdLogger.warning(str(a))  
-            tar = tarfile.open(os.path.join('/tmp',self.localfiles), "r:gz")            
-            file_names = tar.getnames()
-            for file_name in file_names:
-                tar.extract(file_name, '/tmp')
-            tar.close()
+            self._extractTarFiles()
             if os.path.exists('/tmp/nginx'):
                 shellStr="".join(['cd /tmp/nginx/&&./configure --prefix=',self.remotepath,'&&make&&make install'])
                 rm=subprocess.Popen(shellStr,shell=True,universal_newlines=True,stderr=subprocess.PIPE,stdout=subprocess.PIPE) 
@@ -93,10 +96,7 @@ class _installnginxObj(object):
                 stderr=rm.stderr.read()
                 stdLogger.warning(stdout+stderr)
                 if os.path.exists(self.remotepath):
-                    if os.path.exists(os.path.join('/tmp',self.localfiles)):
-                        os.remove(os.path.join('/tmp',self.localfiles))
-                    if os.path.exists('/tmp/nginx'):
-                        shutil.rmtree('/tmp/nginx')
+                    self._removeTempFiles()
                     msg.append('nginx安装成功。')
                     status=True
                 else:
@@ -105,8 +105,21 @@ class _installnginxObj(object):
             else:
                 status=False
                 msg.append('nginx解压失败。')
-        return({'msg':"".join(msg),'std':"".join(std)})  
-
+        return({'msg':"".join(msg),'std':"".join(std)}) 
+        
+    def _removeTempFiles(self):
+        if os.path.exists(os.path.join('/tmp',self.localfiles)):
+            os.remove(os.path.join('/tmp',self.localfiles))
+        if os.path.exists('/tmp/nginx'):
+            shutil.rmtree('/tmp/nginx')
+            
+    def _extractTarFiles(self):  
+        tar = tarfile.open(os.path.join('/tmp',self.localfiles), "r:gz")            
+        file_names = tar.getnames()
+        for file_name in file_names:
+            tar.extract(file_name, '/tmp')
+        tar.close()    
+        
 def installtomcat(**kwages):
     try:
         i=_installtomcatObj(**kwages)
@@ -136,26 +149,38 @@ class _installtomcatObj(object):
             caller = salt.client.Caller()
             a=caller.cmd('cp.get_file',os.path.join('salt://',self.localpath,self.localfiles),os.path.join('/tmp',self.localfiles))
             stdLogger.warning(str(a))
-            tar = tarfile.open(os.path.join('/tmp',self.localfiles), "r:gz")
-            file_names = tar.getnames()
-            for file_name in file_names:
-                tar.extract(file_name, '/tmp')
-            tar.close()
+            self._extractTarFiles()
             if os.path.exists('/tmp/tomcat'):
                 shutil.move('/tmp/tomcat', self.remotepath)
-                with open(os.path.join(self.remotepath,'conf','server.xml'),'w') as serverfile:
-                    serverfile.write(self.serverxml)
-                with open(os.path.join(self.remotepath,'bin','catalina.sh'),'w') as catalinafile:
-                    catalinafile.write(self.catalina)
+                self._createConfFiles()
                 os.system("".join(['chown ',self.user,':',self.group,' -R ',self.remotepath]))
-                if os.path.exists(os.path.join('/tmp',self.localfiles)):
-                    os.remove(os.path.join('/tmp',self.localfiles))
-                if os.path.exists('/tmp/tomcat'):
-                    shutil.rmtree('/tmp/tomcat')
+                self._removeTempFiles()
                 msg.append(self.remotepath)
-                msg.append('tomcat安装成功。')
+                msg.append(' tomcat安装成功。')
                 status=True
             else:
                 status=False
                 msg.append('tomcat解压失败。')
-        return({'status':status,'msg':"".join(msg),'std':"".join(std)})           
+        return({'status':status,'msg':"".join(msg),'std':"".join(std)})    
+    
+    #解压tar包
+    def  _extractTarFiles(self):       
+        tar = tarfile.open(os.path.join('/tmp',self.localfiles), "r:gz")
+        file_names = tar.getnames()
+        for file_name in file_names:
+            tar.extract(file_name, '/tmp')
+        tar.close()
+    
+    #移除临时文件    
+    def _removeTempFiles(self):
+        if os.path.exists(os.path.join('/tmp',self.localfiles)):
+            os.remove(os.path.join('/tmp',self.localfiles))
+        if os.path.exists('/tmp/tomcat'):
+            shutil.rmtree('/tmp/tomcat')
+    
+    #生成tomcat相关配置文件    
+    def _createConfFiles(self):    
+        with open(os.path.join(self.remotepath,'conf','server.xml'),'w') as serverfile:
+            serverfile.write(self.serverxml)
+        with open(os.path.join(self.remotepath,'bin','catalina.sh'),'w') as catalinafile:
+            catalinafile.write(self.catalina)

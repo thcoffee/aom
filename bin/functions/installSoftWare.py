@@ -16,7 +16,6 @@ class jdk(object):
         self.group='deploygroup'
         self.node=self.taskDict['node']
         self.db=kwages['db']
-        self.cur=kwages['cur']
         self.taskid=kwages['taskid']
        
     def install(self):
@@ -36,18 +35,20 @@ class jdk(object):
         dict=s.run()
         if dict =={}:
             sql="insert into aom_msg (msgdate,msgtype,msgcontent,taskid)values (now(),2,'%s',%s)"%('无信息返回.',self.taskid)
+            self.db.putData(sql=sql)
+            self.db.commit()
             stdLogger.debug("".join([str(self.taskid),'no return.']))
         for i in dict:
             for j in dict[i]: 
                 if j=='msg' and dict[i]['msg']!='':
                     sql="insert into aom_msg (msgdate,msgtype,msgcontent,taskid)values (now(),1,'%s',%s)" %("".join([str(i),':',dict[i]['msg']]),self.taskid)
                     #stdLogger.debug(sql)
-                    self.cur.execute(sql) 
+                    self.db.putData(sql=sql) 
                     self.db.commit()
                 elif j=='std' and dict[i]['std']!='':
                     sql="insert into aom_msg (msgdate,msgtype,msgcontent,taskid)values (now(),2,'%s',%s)" %("".join([str(i),':',pymysql.escape_string(dict[i]['std'])]),self.taskid)
                     #stdLogger.debug(sql)
-                    self.cur.execute(sql) 
+                    self.db.putData(sql=sql) 
                     self.db.commit()
                 
                 stdLogger.debug(dict[i][j])
@@ -63,7 +64,6 @@ class nginx(object):
         self.group='deploygroup'
         self.node=self.taskDict['node']
         self.db=kwages['db']
-        self.cur=kwages['cur']
         self.taskid=kwages['taskid']
         
         pass
@@ -85,18 +85,20 @@ class nginx(object):
         dict=s.run()
         if dict =={}:
             sql="insert into aom_msg (msgdate,msgtype,msgcontent,taskid)values (now(),2,'%s',%s)"%('无信息返回.',self.taskid)
+            self.db.putData(sql=sql)
+            self.db.commit()
             stdLogger.debug("".join([str(self.taskid),'no return.']))
         for i in dict:
             for j in dict[i]: 
                 if j=='msg' and dict[i]['msg']!='':
                     sql="insert into aom_msg (msgdate,msgtype,msgcontent,taskid)values (now(),1,'%s',%s)" %("".join([str(i),':',dict[i]['msg']]),self.taskid)
                     #stdLogger.debug(sql)
-                    self.cur.execute(sql) 
+                    self.db.putData(sql=sql) 
                     self.db.commit()
                 elif j=='std' and dict[i]['std']!='':
                     sql="insert into aom_msg (msgdate,msgtype,msgcontent,taskid)values (now(),2,'%s',%s)" %("".join([str(i),':',pymysql.escape_string(dict[i]['std'])]),self.taskid)
                     #stdLogger.debug(sql)
-                    self.cur.execute(sql) 
+                    self.db.putData(sql=sql) 
                     self.db.commit()    
                 #stdLogger.debug(dict[i][j])
                 
@@ -108,7 +110,6 @@ class tomcat(object):
         self.group='deploygroup'
         self.node=self.taskDict['node']
         self.db=kwages['db']
-        self.cur=kwages['cur']
         self.taskid=kwages['taskid']
         self.serverxml=self._getServerXml()
         self.catalina=self._getCatalina()
@@ -148,22 +149,30 @@ class tomcat(object):
         dict=s.run()    
         if dict =={}:
             sql="insert into aom_msg (msgdate,msgtype,msgcontent,taskid)values (now(),2,'%s',%s)"%('无信息返回.',self.taskid)
+            self.db.putData(sql=sql)
+            self.db.commit()
             stdLogger.debug("".join([str(self.taskid),'no return.'])) 
         for i in dict:
             for j in dict[i]: 
                 if j=='msg' and dict[i]['msg']!='':
                     sql="insert into aom_msg (msgdate,msgtype,msgcontent,taskid)values (now(),1,'%s',%s)" %("".join([str(i),':',dict[i]['msg']]),self.taskid)
-                    self.cur.execute(sql) 
+                    self.db.putData(sql=sql) 
                     self.db.commit()
                 elif j=='std' and dict[i]['std']!='':
                     sql="insert into aom_msg (msgdate,msgtype,msgcontent,taskid)values (now(),2,'%s',%s)" %("".join([str(i),':',pymysql.escape_string(dict[i]['std'])]),self.taskid)
-                    self.cur.execute(sql) 
+                    self.db.putData(sql=sql) 
                     self.db.commit()
             stdLogger.debug(dict[i])     
             if dict[i]['status']:
-                 pass
+                self._addAppServer(i)
             else:
-                 pass                
+                pass                
                                    
-                    
-                    
+    def _addAppServer(self,i):                
+        sql='select appserver_type_id from aom_appserver_type where softtypeid=%s'%(self.taskDict['softtypeid'])     
+        sql="insert into aom_appserver (appserver_type_id,nodeid)  values (%s,'%s')"%(self.db.getData(sql=sql)[0]['appserver_type_id'],str(i))  
+        self.db.putData(sql=sql) 
+        sql="insert into aom_appserver_tomcat(appserverid,http_port,shutdown_port,ajp_port,basedir,docbase,appbase,javahome,javaopts) values(%s,%s,%s,%s,'%s','%s','%s','%s','%s')"%(self.db.getLastID(),self.taskDict['httpport'],self.taskDict['shutdownport'],self.taskDict['ajpport'],self.taskDict['basedir'],self.taskDict['docbase'],self.taskDict['appbase'],self.taskDict['javahome'],pymysql.escape_string(self.taskDict['javaopt']))
+        #stdLogger.debug(sql)
+        self.db.putData(sql=sql)
+        self.db.commit()            

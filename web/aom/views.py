@@ -162,6 +162,7 @@ def tomcatcommit(request):
           'localfiles':localpathfiles[0][1],
           'remotepath':request.POST.get('remotepath',''),
           'name':'tomcat',
+          'softtypeid':request.POST.get('softversion',1),
           'httpport':request.POST.get('httpport',''),
           'shutdownport':request.POST.get('shutdownport',''),
           'ajpport':request.POST.get('ajpport',''),
