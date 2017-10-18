@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 import json
 import pymysql
+import time
 #导入数据库操作模块
 from . import db
 
@@ -200,19 +201,50 @@ def installsoftinfo(request):
 
 @csrf_exempt    
 def postData(request):
+    
     if request.method != "POST":
         return HttpResponse("参数错误")
     #print(request.POST.get('softversion'))
     return_json={'result':'error'}
+    
     if request.POST.get('page')=='installjdkadd':
         if request.POST.get('type')=='defautlpath':    
             return_json = {'result':{'defaultpath':_getDefaultpath(request.POST.get('softversion'))}}   
-    #print(return_json)            
+    elif request.POST.get('page')=='installtomcatadd':
+        if request.POST.get('type')=='checkform':
+           #print(request.POST.get('httpport'),request.POST.get('remotepath'),request.POST.get('shutdownport'),request.POST.get('ajpport'),request.POST.get('node'),request.POST.getlist('node'))
+            time.sleep(10)
+            return_json = {'result':_checkTomcatForm(**{
+                                                         'httpport':request.POST.get('httpport'),
+                                                         'remotepath':request.POST.get('remotepath'),
+                                                         'shutdownport':request.POST.get('shutdownport'),
+                                                         'node':request.POST.getlist('node'),
+                                                         'ajpport':request.POST.get('ajpport'),
+                                                        }
+                                                     )
+                           }
+            
+         
     return HttpResponse(json.dumps(return_json), content_type='application/json')        
 
 def _getDefaultpath(softtypeid):
     dbcon=db.opMysqlObj(**{'dbname':'default'})
     return(dbcon.getDefaultPath(**{'softtypeid':softtypeid}))
+
+def _checkTomcatForm(**kwage):
+    temp=[]
+    dbcon=db.opMysqlObj(**{'dbname':'default'})
+    for i in kwage['node']:
     
+        sql="SELECT COUNT(*) FROM aom_appserver a ,aom_appserver_tomcat b WHERE a.`appserverid`=b.`appserverid` AND nodeid ='%s' AND (http_port='%s' OR shutdown_port='%s' OR ajp_port='%s' OR baseDir='%s')"%(i,kwage['httpport'],kwage['shutdownport'],kwage['ajpport'],kwage['remotepath'])
+        print(dbcon.getData(sql=sql))
+        print(sql)
+        if dbcon.getData(sql=sql)[0][0]==1:
+             
+            return({'status':'false','msg':i+'安装目录或端口有冲突'})
+    return({'status':'true','msg':'挺好'})        
+        
+        
+    pass    
 def test1(request):
     return render(request, 'aom/head.html',{})

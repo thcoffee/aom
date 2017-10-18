@@ -171,26 +171,26 @@
 //初始化默认路径只读，获取默认路径
 //目录只读
 $("#remotepath").attr("readOnly",true);
-customfun($("#remotepath"),$("#custom"))
+customfun($("#remotepath"),$("#custom"));
 $("#httpport").attr("readOnly",true);
-customfun($("#httpport"),$("#httpportcheck"))
+customfun($("#httpport"),$("#httpportcheck"));
 
 $("#shutdownport").attr("readOnly",true);
-customfun($("#shutdownport"),$("#shutdownportcheck"))
+customfun($("#shutdownport"),$("#shutdownportcheck"));
 $("#ajpport").attr("readOnly",true);
-customfun($("#ajpport"),$("#ajpportcheck"))
+customfun($("#ajpport"),$("#ajpportcheck"));
 $("#basedir").attr("readOnly",true);
-customfun($("#basedir"),$("#basedircheck"))
+customfun($("#basedir"),$("#basedircheck"));
 $("#docbase").attr("readOnly",true);
-customfun($("#docbase"),$("#docbasecheck"))
+customfun($("#docbase"),$("#docbasecheck"));
 $("#appbase").attr("readOnly",true);
-customfun($("#appbase"),$("#appbasecheck"))
+customfun($("#appbase"),$("#appbasecheck"));
 $("#javahome").attr("readOnly",true);
-customfun($("#javahome"),$("#javahomecheck"))
+customfun($("#javahome"),$("#javahomecheck"));
 $("#javaopt").attr("readOnly",true);
-customfun($("#javaopt"),$("#javaoptcheck"))
+customfun($("#javaopt"),$("#javaoptcheck"));
 
-
+checkformval=true;
 //获取默认目录
 getdefautlpath();
 
@@ -209,20 +209,55 @@ function getdefautlpath(){
              $("#remotepath").prop("value",result.result.defaultpath);
         });
     }
+    
+//校验表单信息是否重复
+function checkform(){
+    var checkformstatus = true;
+    $.ajax({url:"/aom/postData/",
+            data:{'page':'installtomcatadd',
+                  'type':'checkform',
+                  'remotepath':$("#remotepath").val(),
+                  'httpport':$("#httpport").val(),
+                  'shutdownport':$("#shutdownport").val(),
+                  'ajpport':$("#ajpport").val(),
+                  'node':$("#nodeselect option:selected").val(),
+                  }, 
+            async:false,
+            type:"POST",
+            dataType:"json",
+            success:function(result){         
+               if (result.result.status!='true'){
+                    checkformstatus = false;
+                    alert(result.result.msg);
+                    }
+            },
+            error:function (XMLHttpRequest, textStatus, errorThrown){
+                 alert('访问网络失败！'+ errorThrown);
+                 checkformstatus = false;
+                }
+            });                       
+    return checkformstatus;
+}
 
 //表单校验
 function check(){
-    var select=document.getElementById("nodeselect")
+     
+    var select=document.getElementById("nodeselect");
+    for (var i=0;i<select.length;i++)
+         {
+           select[i].selected=true; 
+           }
     if (select.length==0){
-        alert('未选中任何节点')
+        alert('未选中任何节点');
         return false;
     }
-    for (var i=0;i<select.length;i++)
-    {
-      select[i].selected=true; 
-      }
+    //alert('表单有问题');
+    if (checkform()!=true ){
+       return false;
+    }    
    return true;
 }    
+
 
 //是否自定义路径
 function customfun($i,$c){
