@@ -1,6 +1,6 @@
 {%extends "aom/base.html"%}
 {% block content %}
-
+<script type="text/javascript" src="/static/js/jdk.js"></script>
 <div class="container " >
     <div class="row">
         <div class="col-md-12">
@@ -9,9 +9,9 @@
                     <h3 class="panel-title">安装JDK</h3>
                 </div>
                 <div class="panel-body">
-                    <form class="form-horizontal" role="form" action="/aom/jdkcommit/" method="post" name="frm" onsubmit="return check()">
+                    <form class="form-horizontal" role="form" action="#" method="post" name="frm" > 
                     {% csrf_token %}
-                        <div class="form-group">
+                       <div class="form-group">
                            <label class="col-sm-2 control-label" type="text">软件版本：</label>
                             <div class="col-sm-5">
                                 <select id="softversion" name="softversion" class="selectpicker show-tick form-control" data-live-search="false">
@@ -24,18 +24,15 @@
                         <div class="form-group">
                             <label for="remotepath" class="col-sm-2 control-label">安装目录：</label>
                             <div class="col-sm-5">
-                                <input type="text" class="form-control" id="remotepath" name="remotepath">
-                                
+                                <input type="text" class="form-control" id="remotepath" name="remotepath" readonly="readonly" value="/home/deployuser/adcc/software/jdk1">                      
                             </div>
                             <div class="col-sm-2">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" id="custom" name="custom" >自定义
+                                        <input type="checkbox" id="custom" name="custom" onclick="check2input($(this),$('#remotepath'))">自定义
                                     </label>
                                 </div>
-                            </div>
-                           
-                           
+                            </div>                       
                         </div>
                         
                         <div class="form-group">
@@ -56,72 +53,13 @@
                         <div class="form-group">
                             <label class="col-sm-1 control-label" type="text"></label>
                             <div class="col-sm-offset-1 col-sm-1">
-                                <button type="submit" class="btn btn-default">提交</button>
+                                <button class="btn btn-default" type="button" onclick="commit()">提交</button>    
                             </div>
                         </div>
-                    </form>                        
+                    </form>                     
                 </div>                              
             </div>
         </div>    
     </div>
 </div>
-<script>
-//初始化默认路径只读，获取默认路径
-//目录只读
-$("#remotepath").attr("readOnly",true);
-
-//获取默认目录
-getdefautlpath();
-
-//select to select 
-function select2select(x,y){
-    if (x.value != ''){
-        y.options[y.options.length]=new Option(x.value,x.text);
-    x.options[x.selectedIndex]=null;}
-}
-//获取默认路径
-function getdefautlpath(){
-        $.post("/aom/postData/",{'page':'installjdkadd',
-                                 'type':'defautlpath',        
-                                 'softversion':$("#softversion").val()},function(result){
-             //alert(b);
-             $("#remotepath").prop("value",result.result.defaultpath);
-        });
-    }
-
-//表单校验
-function check(){
-    var select=document.getElementById("nodeselect")
-    if (select.length==0){
-        alert('未选中任何节点')
-        return false;
-    }
-    for (var i=0;i<select.length;i++)
-    {
-      select[i].selected=true; 
-      }
-   return true;
-}    
-
-//是否自定义路径
-$(document).ready(function(){
-    $('#custom').click(function(){
-        if($('input[name="custom"]').prop("checked")){
-            $("#remotepath").prop("readOnly",false);               
-            }    
-        else{
-            $("#remotepath").prop("readOnly",true);  
-            getdefautlpath();
-            }            
-    });
-})
-
- //选择版本变化默认路径    
-$(document).ready(function(){
-    $('#softversion').click(function(){
-        getdefautlpath();
-        });
-})
-
-</script>  
 {% endblock %}

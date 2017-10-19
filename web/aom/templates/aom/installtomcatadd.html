@@ -1,6 +1,6 @@
 {%extends "aom/base.html"%}
 {% block content %}
-
+<script type="text/javascript" src="/static/js/tomcat.js"></script>
 <div class="container " >
     <div class="row">
         <div class="col-md-12">
@@ -9,7 +9,7 @@
                     <h3 class="panel-title">安装tomcat</h3>
                 </div>
                 <div class="panel-body">
-                    <form class="form-horizontal" role="form" action="/aom/tomcatcommit/" method="post" name="frm" onsubmit="return check()">
+                    <form class="form-horizontal" role="form" action="/aom/tomcatcommit/" method="post" name="frm">
                     {% csrf_token %}
                         <div class="form-group">
                            <label class="col-sm-2 control-label" type="text">软件版本：</label>
@@ -24,12 +24,12 @@
                         <div class="form-group">
                             <label for="remotepath" class="col-sm-2 control-label">安装目录：</label>
                             <div class="col-sm-5">
-                                <input type="text" class="form-control" id="remotepath" name="remotepath">                 
+                                <input type="text" class="form-control" id="remotepath" name="remotepath" readonly="readonly" value="/home/deployuser/adcc/software/tomcat">                 
                             </div>
                             <div class="col-sm-2">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" id="custom" name="custom" >自定义
+                                        <input type="checkbox" id="custom" name="custom" onclick="check2input($(this),$('#remotepath'))">自定义
                                     </label>
                                 </div>
                             </div>  
@@ -37,13 +37,13 @@
                         <div class="form-group">
                             <label for="httpport" class="col-sm-2 control-label">http端口：</label>
                             <div class="col-sm-1">
-                                <input type="text" class="form-control" id="httpport" name="httpport" value="80">
+                                <input type="text" class="form-control" id="httpport" name="httpport" value="80" readonly="readonly">
                                 
                             </div>
                             <div class="col-sm-2">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" id="httpportcheck" name="httpportcheck" >自定义
+                                        <input type="checkbox" id="httpportcheck" name="httpportcheck" onclick="check2input($(this),$('#httpport'))" >自定义
                                     </label>
                                 </div>
                             </div>  
@@ -51,12 +51,12 @@
                         <div class="form-group">
                             <label for="shutdownport" class="col-sm-2 control-label">shutdown端口：</label>
                             <div class="col-sm-1">
-                                <input type="text" class="form-control" id="shutdownport" name="shutdownport" value="8005">                      
+                                <input type="text" class="form-control" id="shutdownport" name="shutdownport" value="8005" readonly="readonly">                      
                             </div>
                             <div class="col-sm-2">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" id="shutdownportcheck" name="shutdownportcheck" >自定义
+                                        <input type="checkbox" id="shutdownportcheck" name="shutdownportcheck" onclick="check2input($(this),$('#shutdownport'))">自定义
                                     </label>
                                 </div>
                             </div>  
@@ -64,25 +64,12 @@
                         <div class="form-group">
                             <label for="ajpport" class="col-sm-2 control-label">AJP端口：</label>
                             <div class="col-sm-1">
-                                <input type="text" class="form-control" id="ajpport" name="ajpport" value="8009">                      
+                                <input type="text" class="form-control" id="ajpport" name="ajpport" value="8009" readonly="readonly">                      
                             </div>
                             <div class="col-sm-2">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" id="ajpportcheck" name="ajpportcheck" >自定义
-                                    </label>
-                                </div>
-                            </div>  
-                        </div>
-                        <div class="form-group">
-                            <label for="basedir" class="col-sm-2 control-label">Base目录：</label>
-                            <div class="col-sm-5">
-                                <input type="text" class="form-control" id="basedir" name="basedir" value="/home/deployuser/adcc/software/tomcat">                      
-                            </div>
-                            <div class="col-sm-2">
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" id="basedircheck" name="basedircheck" >自定义
+                                        <input type="checkbox" id="ajpportcheck" name="ajpportcheck" onclick="check2input($(this),$('#ajpport'))">自定义
                                     </label>
                                 </div>
                             </div>  
@@ -90,12 +77,12 @@
                         <div class="form-group">
                             <label for="docbase" class="col-sm-2 control-label">DocBase目录：</label>
                             <div class="col-sm-5">
-                                <input type="text" class="form-control" id="docbase" name="docbase" value="/home/deployuser/adcc/app/war">                      
+                                <input type="text" class="form-control" id="docbase" name="docbase" value="/home/deployuser/adcc/app/war" readonly="readonly">                      
                             </div>
                             <div class="col-sm-2">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" id="docbasecheck" name="docbasecheck" >自定义
+                                        <input type="checkbox" id="docbasecheck" name="docbasecheck" onclick="check2input($(this),$('#docbase'))">自定义
                                     </label>
                                 </div>
                             </div>  
@@ -103,12 +90,12 @@
                         <div class="form-group">
                             <label for="appbase" class="col-sm-2 control-label">appBase目录：</label>
                             <div class="col-sm-5">
-                                <input type="text" class="form-control" id="appbase" name="appbase" value="/home/deployuser/adcc/software/tomcat/webapps">                      
+                                <input type="text" class="form-control" id="appbase" name="appbase" value="/home/deployuser/adcc/software/tomcat/webapps" readonly="readonly">                      
                             </div>
                             <div class="col-sm-2">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" id="appbasecheck" name="appbasecheck" >自定义
+                                        <input type="checkbox" id="appbasecheck" name="appbasecheck" onclick="check2input($(this),$('#appbase'))">自定义
                                     </label>
                                 </div>
                             </div>  
@@ -117,12 +104,12 @@
                         <div class="form-group">
                             <label for="javahome" class="col-sm-2 control-label">JAVAHOME目录：</label>
                             <div class="col-sm-5">
-                                <input type="text" class="form-control" id="javahome" name="javahome" value="/home/deployuser/adcc/software/jdk">                      
+                                <input type="text" class="form-control" id="javahome" name="javahome" value="/home/deployuser/adcc/software/jdk" readonly="readonly">                      
                             </div>
                             <div class="col-sm-2">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" id="javahomecheck" name="javahomecheck" >自定义
+                                        <input type="checkbox" id="javahomecheck" name="javahomecheck" onclick="check2input($(this),$('#javahome'))">自定义
                                     </label>
                                 </div>
                             </div>  
@@ -130,12 +117,12 @@
                         <div class="form-group">
                             <label for="javaopt" class="col-sm-2 control-label">JAVAOPT参数：</label>
                             <div class="col-sm-7">
-                                <textarea class="form-control" id="javaopt" rows="6" name="javaopt" value="">-Xms1024m -Xmx1024m -Xss512k -XX:SurvivorRatio=1 -XX:PermSize=128m -XX:MaxPermSize=128m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/deployuser/adcc/software/tomcat/logs/ -XX:+DisableExplicitGC -XX:+UseParallelGC -XX:+UseParallelOldGC -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:/home/deployuser/adcc/software/tomcat/logs/gc$(date +"%y.%m.%d%H%M%S").log -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false</textarea>                  
+                                <textarea class="form-control" id="javaopt" rows="6" name="javaopt" value="" readonly="readonly">-Xms1024m -Xmx1024m -Xss512k -XX:SurvivorRatio=1 -XX:PermSize=128m -XX:MaxPermSize=128m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/deployuser/adcc/software/tomcat/logs/ -XX:+DisableExplicitGC -XX:+UseParallelGC -XX:+UseParallelOldGC -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:/home/deployuser/adcc/software/tomcat/logs/gc$(date +"%y.%m.%d%H%M%S").log -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false</textarea>                  
                             </div>
                             <div class="col-sm-2">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" id="javaoptcheck" name="javaoptcheck" >自定义
+                                        <input type="checkbox" id="javaoptcheck" name="javaoptcheck" onclick="check2input($(this),$('#javaopt'))">自定义
                                     </label>
                                 </div>
                             </div>  
@@ -158,7 +145,7 @@
                         <div class="form-group">
                             <label class="col-sm-1 control-label" type="text"></label>
                             <div class="col-sm-offset-1 col-sm-1">
-                                <button type="submit" class="btn btn-default">提交</button>
+                               <button class="btn btn-default" type="button" onclick="commit()">提交</button>  
                             </div>
                         </div>
                     </form>                        
@@ -170,6 +157,7 @@
 <script>
 //初始化默认路径只读，获取默认路径
 //目录只读
+/*
 $("#remotepath").attr("readOnly",true);
 customfun($("#remotepath"),$("#custom"));
 $("#httpport").attr("readOnly",true);
@@ -279,6 +267,6 @@ $(document).ready(function(){
         getdefautlpath();
         });
 })
-
+*/
 </script>  
 {% endblock %}

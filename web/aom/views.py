@@ -80,6 +80,7 @@ def installsoftList(request):
     return render(request, 'aom/installsoftlist.html',data)
 
 #安装jdk表单
+
 def installjdkAdd(request):
     data=_initPage(request)
     sql="SELECT softtypeid,softname,softversion FROM aom_softtype where softname='jdk' ORDER BY 2,3;"
@@ -90,6 +91,7 @@ def installjdkAdd(request):
     return render(request, 'aom/installjdkadd.html',data) 
 
 #接收安装jdk表单提交
+@csrf_exempt 
 def jdkcommit(request):
     if request.method != "POST":
         return HttpResponse("参数错误")
@@ -102,12 +104,12 @@ def jdkcommit(request):
           'localfiles':localpathfiles[0][1],
           'remotepath':request.POST.get('remotepath',''),
           'name':'jdk','node':request.POST.getlist('nodeselect')}
-    
     d.putData(sql="INSERT INTO aom_task_before (taskdate,tasktype,userid,taskstatus,taskcontent) VALUES (NOW(),'installsoftware',1,1,\"%s\")" %(str(data)))
     d.putData(sql="insert into aom_task_soft (taskid,softTYPEID)values (%s,%s)"%(d.getLaseID(),request.POST.get('softversion',1)))
     d.commit()
     d.close()
-    return HttpResponseRedirect("/aom/installsoftlist/")  
+    #return HttpResponseRedirect("/aom/installsoftlist/")  
+    return HttpResponse(json.dumps({}), content_type='application/json')   
 
 #安装jdk表单
 def installnginxAdd(request):
@@ -120,6 +122,7 @@ def installnginxAdd(request):
     return render(request, 'aom/installnginxadd.html',data) 
 
 #接收安装jdk表单提交
+@csrf_exempt 
 def nginxcommit(request):
     if request.method != "POST":
         return HttpResponse("参数错误")
@@ -137,10 +140,12 @@ def nginxcommit(request):
     d.putData(sql="insert into aom_task_soft (taskid,softTYPEID)values (%s,%s)"%(d.getLaseID(),request.POST.get('softversion',1)))
     d.commit()
     d.close()
-    return HttpResponseRedirect("/aom/installsoftlist/")      
+    return HttpResponse(json.dumps({}), content_type='application/json')    
+
 
 
 #安装jdk表单
+
 def installtomcatAdd(request):
     data=_initPage(request)
     sql="SELECT softtypeid,softname,softversion FROM aom_softtype where softname='tomcat' ORDER BY 2,3;"
@@ -151,9 +156,17 @@ def installtomcatAdd(request):
     return render(request, 'aom/installtomcatadd.html',data) 
 
 #接收安装jdk表单提交
+@csrf_exempt 
 def tomcatcommit(request):
     if request.method != "POST":
         return HttpResponse("参数错误")
+    return_json=_checkTomcatForm(**{'httpport':request.POST.get('httpport'),
+                        'remotepath':request.POST.get('remotepath'),
+                        'shutdownport':request.POST.get('shutdownport'),
+                        'node':request.POST.getlist('nodeselect'),
+                        'ajpport':request.POST.get('ajpport')})    
+    if return_json['status']=='false':
+        return HttpResponse(json.dumps(return_json), content_type='application/json')    
     sql="SELECT softpath,softfiles FROM aom_softtype where softTYPEID="+request.POST.get('softversion',1)
     d=db.opMysqlObj(**{'dbname':'default'})
     #print(request.POST.getlist('nodeselect'))
@@ -167,7 +180,7 @@ def tomcatcommit(request):
           'httpport':request.POST.get('httpport',''),
           'shutdownport':request.POST.get('shutdownport',''),
           'ajpport':request.POST.get('ajpport',''),
-          'basedir':request.POST.get('basedir',''),
+          #'basedir':request.POST.get('basedir',''),
           'docbase':request.POST.get('docbase',''),
           'appbase':request.POST.get('appbase',''),
           'javahome':request.POST.get('javahome',''),
@@ -178,7 +191,8 @@ def tomcatcommit(request):
     d.putData(sql="insert into aom_task_soft (taskid,softTYPEID)values (%s,%s)"%(d.getLaseID(),request.POST.get('softversion',1)))
     d.commit()
     d.close()
-    return HttpResponseRedirect("/aom/installsoftlist/")   
+    return HttpResponse(json.dumps({'status':'true'}), content_type='application/json')   
+    #return HttpResponseRedirect("/aom/installsoftlist/")   
 
     
 #安装软件列表相信信息
@@ -237,8 +251,8 @@ def _checkTomcatForm(**kwage):
     for i in kwage['node']:
     
         sql="SELECT COUNT(*) FROM aom_appserver a ,aom_appserver_tomcat b WHERE a.`appserverid`=b.`appserverid` AND nodeid ='%s' AND (http_port='%s' OR shutdown_port='%s' OR ajp_port='%s' OR baseDir='%s')"%(i,kwage['httpport'],kwage['shutdownport'],kwage['ajpport'],kwage['remotepath'])
-        print(dbcon.getData(sql=sql))
-        print(sql)
+        #print(dbcon.getData(sql=sql))
+        #print(sql)
         if dbcon.getData(sql=sql)[0][0]==1:
              
             return({'status':'false','msg':i+'安装目录或端口有冲突'})

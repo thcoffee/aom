@@ -172,7 +172,7 @@ class tomcat(object):
         sql='select appserver_type_id from aom_appserver_type where softtypeid=%s'%(self.taskDict['softtypeid'])     
         sql="insert into aom_appserver (appserver_type_id,nodeid)  values (%s,'%s')"%(self.db.getData(sql=sql)[0]['appserver_type_id'],str(i))  
         self.db.putData(sql=sql) 
-        sql="insert into aom_appserver_tomcat(appserverid,http_port,shutdown_port,ajp_port,basedir,docbase,appbase,javahome,javaopts) values(%s,%s,%s,%s,'%s','%s','%s','%s','%s')"%(self.db.getLastID(),self.taskDict['httpport'],self.taskDict['shutdownport'],self.taskDict['ajpport'],self.taskDict['basedir'],self.taskDict['docbase'],self.taskDict['appbase'],self.taskDict['javahome'],pymysql.escape_string(self.taskDict['javaopt']))
+        sql="insert into aom_appserver_tomcat(appserverid,http_port,shutdown_port,ajp_port,basedir,docbase,appbase,javahome,javaopts) values(%s,%s,%s,%s,'%s','%s','%s','%s','%s')"%(self.db.getLastID(),self.taskDict['httpport'],self.taskDict['shutdownport'],self.taskDict['ajpport'],self.taskDict['remotepath'],self.taskDict['docbase'],self.taskDict['appbase'],self.taskDict['javahome'],pymysql.escape_string(self.taskDict['javaopt']))
         #stdLogger.debug(sql)
         self.db.putData(sql=sql)
         self.db.commit()            
