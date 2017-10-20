@@ -1,5 +1,6 @@
 //表单校验
 function checkform(){
+    alert($('#frm').serialize())
     var select=document.getElementById("nodeselect")
     if (select.length==0){
         alert('未选中任何节点')
@@ -16,17 +17,7 @@ function checkform(){
 function commit(){
     if (checkform()!=true){return false;}
     $.ajax({url:"/aom/tomcatcommit/",
-            data:{'softversion':$("#softversion").val(),
-                  'remotepath':$("#remotepath").val(),
-                  'httpport':$("#httpport").val(),
-                  'shutdownport':$("#shutdownport").val(),
-                  'ajpport':$("#ajpport").val(),
-                  'docbase':$("#docbase").val(),
-                  'appbase':$("#appbase").val(),
-                  'javahome':$("#javahome").val(),
-                  'javaopt':$("#javaopt").val(),
-                  'nodeselect':$("#nodeselect option:selected").val(),
-                  }, 
+            data:$('#frm').serialize(),      
             type:"POST",
             dataType:"json",
             success:function(result){         

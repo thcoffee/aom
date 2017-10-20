@@ -15,12 +15,8 @@ function checkform(){
 //提交表单
 function commit(){
     if (checkform()!=true){return false;}
-    $.ajax({url:"/aom/nginxcommit/",
-            data:{
-                  'softversion':$("#softversion").val(),
-                  'remotepath':$("#remotepath").val(),
-                  'nodeselect':$("#nodeselect option:selected").val(),
-                  }, 
+    $.ajax({url:"/aom/jdkcommit/",
+            data:$('#frm').serialize(), 
             type:"POST",
             dataType:"json",
             success:function(result){         

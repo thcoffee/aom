@@ -10,9 +10,29 @@ import pymysql
 import time
 #导入数据库操作模块
 from . import db
-
 # Create your views here.
 
+#页面访问权限验证妆饰器
+def _auth_page(view):  
+
+    #检测该组或者该用户是否有访问页面权限
+    def _checkauth(**kwargs):
+        dbcon=db.opMysqlObj(**{'dbname':'default'})
+        checkusersql="SELECT count(*) FROM auth_user_user_permissions a,auth_permission b WHERE a.`permission_id`=b.`id` AND a.`user_id`=%s AND b.codename='%s'"%(kwargs['user'],kwargs['page'])
+        checkgroupsql="SELECT count(*) FROM auth_group_permissions a,auth_permission b,auth_user_groups c WHERE a.`permission_id`=b.`id` AND a.`group_id`=c.`group_id` AND  c.`user_id` =%s AND b.codename='%s'"%(kwargs['user'],kwargs['page'])
+        checksuperusersql="select count(*) from auth_user where id=%s and is_superuser=1"%(kwargs['user'])
+        
+        if dbcon.getData(**{'sql':checkusersql})[0][0]==0 and dbcon.getData(**{'sql':checkgroupsql})[0][0]==0 and dbcon.getData(**{'sql':checksuperusersql})[0][0]==0:
+           return(False)
+        else:
+           return(True)
+            
+    def decorator(request, *args, **kwargs):        
+        if _checkauth(**{'user':request.user.id,'page':view.__name__}):  
+            return view(request, *args, **kwargs)
+        else:  
+            return HttpResponse("没有权限")       
+    return decorator  
 #分页
 def _my_pagination(request, queryset, display_amount=10, after_range_num = 5,bevor_range_num = 4):
     #按参数分页
@@ -52,7 +72,8 @@ def _initPage(request):
     data['userid']=str(request.user)
     return(data)
     
-@login_required(login_url="/admin/login/")      
+@login_required(login_url="/admin/login/")    
+ 
 def test(request):
     data=_initPage(request)
     sql='select * from adc_deploy order by 1 limit 0,121'
@@ -67,6 +88,7 @@ def test(request):
 
 #安装软件列表    
 @login_required(login_url="/admin/login/")   
+@_auth_page
 def installsoftList(request):
     data=_initPage(request)
     sql="SELECT a.taskid,a.taskdate,f.`softname`,f.`softversion`,c.`username`,d.`taskstatusname` FROM (SELECT taskid,taskdate,tasktype,userid,taskstatus FROM aom_task_before WHERE tasktype='installsoftware' UNION ALL  SELECT taskid,taskdate,tasktype,userid,taskstatus FROM aom_task_after WHERE tasktype='installsoftware')  a LEFT JOIN aom_task_type b ON a.tasktype=b.tasktypeid LEFT JOIN auth_user c ON a.userid=c.`id` LEFT JOIN aom_task_status d ON a.taskstatus=d.`taskstatusid` LEFT JOIN aom_task_soft e ON a.taskid=e.`taskid` LEFT JOIN aom_softtype f ON  e.`softtypeid`=f.`softtypeid` ORDER BY a.taskid DESC"
@@ -80,7 +102,8 @@ def installsoftList(request):
     return render(request, 'aom/installsoftlist.html',data)
 
 #安装jdk表单
-
+@login_required(login_url="/admin/login/")   
+@_auth_page   
 def installjdkAdd(request):
     data=_initPage(request)
     sql="SELECT softtypeid,softname,softversion FROM aom_softtype where softname='jdk' ORDER BY 2,3;"
@@ -91,6 +114,7 @@ def installjdkAdd(request):
     return render(request, 'aom/installjdkadd.html',data) 
 
 #接收安装jdk表单提交
+@login_required(login_url="/admin/login/")     
 @csrf_exempt 
 def jdkcommit(request):
     if request.method != "POST":
@@ -112,6 +136,8 @@ def jdkcommit(request):
     return HttpResponse(json.dumps({}), content_type='application/json')   
 
 #安装jdk表单
+@login_required(login_url="/admin/login/")  
+@_auth_page    
 def installnginxAdd(request):
     data=_initPage(request)
     sql="SELECT softtypeid,softname,softversion FROM aom_softtype where softname='nginx' ORDER BY 2,3;"
@@ -122,6 +148,7 @@ def installnginxAdd(request):
     return render(request, 'aom/installnginxadd.html',data) 
 
 #接收安装jdk表单提交
+@login_required(login_url="/admin/login/")     
 @csrf_exempt 
 def nginxcommit(request):
     if request.method != "POST":
@@ -142,10 +169,9 @@ def nginxcommit(request):
     d.close()
     return HttpResponse(json.dumps({}), content_type='application/json')    
 
-
-
 #安装jdk表单
-
+@login_required(login_url="/admin/login/")
+@_auth_page
 def installtomcatAdd(request):
     data=_initPage(request)
     sql="SELECT softtypeid,softname,softversion FROM aom_softtype where softname='tomcat' ORDER BY 2,3;"
@@ -156,6 +182,7 @@ def installtomcatAdd(request):
     return render(request, 'aom/installtomcatadd.html',data) 
 
 #接收安装jdk表单提交
+@login_required(login_url="/admin/login/")      
 @csrf_exempt 
 def tomcatcommit(request):
     if request.method != "POST":
@@ -166,7 +193,7 @@ def tomcatcommit(request):
                         'node':request.POST.getlist('nodeselect'),
                         'ajpport':request.POST.get('ajpport')})    
     if return_json['status']=='false':
-        return HttpResponse(json.dumps(return_json), content_type='application/json')    
+        return HttpResponse(json.dumps(return_json), content_type='application/json')        
     sql="SELECT softpath,softfiles FROM aom_softtype where softTYPEID="+request.POST.get('softversion',1)
     d=db.opMysqlObj(**{'dbname':'default'})
     #print(request.POST.getlist('nodeselect'))
@@ -196,6 +223,8 @@ def tomcatcommit(request):
 
     
 #安装软件列表相信信息
+@login_required(login_url="/admin/login/")  
+@_auth_page    
 def installsoftinfo(request):
     if request.method != "GET":
         return HttpResponse("参数错误")
@@ -213,6 +242,7 @@ def installsoftinfo(request):
     data['objects_head']=objects_head
     return render(request, 'aom/installsoftinfo.html',data) 
 
+@login_required(login_url="/admin/login/")         
 @csrf_exempt    
 def postData(request):
     
