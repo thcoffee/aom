@@ -165,7 +165,18 @@ class AomNginx(models.Model):
     
     def __str__(self):
         return("".join([str(self.node),str(self.basedir)]))
-    
+
+class AomNginxConf(models.Model):
+    nginx_conf_id = models.AutoField(primary_key=True)
+    nginx = models.ForeignKey(AomNginx, models.DO_NOTHING, blank=True, null=True)
+    nginx_filename = models.CharField(max_length=1024, blank=True, null=True)
+    nginx_filetype = models.CharField(max_length=50, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'aom_nginx_conf'        
+
+        
 class AomNode(models.Model):
     nodeid = models.CharField(primary_key=True, max_length=50)
     osid = models.ForeignKey('AomOs', models.DO_NOTHING, db_column='osid', blank=True, null=True)

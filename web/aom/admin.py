@@ -14,6 +14,7 @@ from .models import AomAppserver
 from .models import AomAppserverTomcat
 from .models import AomApp2Jvm
 from .models import AomNginx
+from .models import AomNginxConf
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
 
@@ -43,5 +44,6 @@ admin.site.register(AomAppserverType)
 admin.site.register(AomAppserver,AomAppserverAdmin)
 admin.site.register(AomApp2Jvm)
 admin.site.register(AomNginx)
+admin.site.register(AomNginxConf)
 admin.site.register(ContentType)
 admin.site.register(Permission)
