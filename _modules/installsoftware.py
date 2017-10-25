@@ -97,6 +97,7 @@ class _installnginxObj(object):
                 stdLogger.warning(stdout+stderr)
                 if os.path.exists(self.remotepath):
                     self._removeTempFiles()
+                    msg.append(self.remotepath)
                     msg.append('nginx安装成功。')
                     status=True
                 else:
@@ -105,7 +106,7 @@ class _installnginxObj(object):
             else:
                 status=False
                 msg.append('nginx解压失败。')
-        return({'msg':"".join(msg),'std':"".join(std)}) 
+        return({'status':status,'msg':"".join(msg),'std':"".join(std)}) 
         
     def _removeTempFiles(self):
         if os.path.exists(os.path.join('/tmp',self.localfiles)):

@@ -1,6 +1,6 @@
 //表单校验
 function checkform(){
-    alert($('#frm').serialize())
+    //alert($('#frm').serialize())
     var select=document.getElementById("nodeselect")
     if (select.length==0){
         alert('未选中任何节点')

@@ -155,7 +155,6 @@ def nginxcommit(request):
         return HttpResponse("参数错误")
     sql="SELECT softpath,softfiles FROM aom_softtype where softTYPEID="+request.POST.get('softversion',1)
     d=db.opMysqlObj(**{'dbname':'default'})
-    #print(request.POST.getlist('nodeselect'))
     localpathfiles=d.getData(sql=sql)
     data={'task':'installsoftware',
           'localpath':localpathfiles[0][0],
@@ -167,7 +166,7 @@ def nginxcommit(request):
     d.putData(sql="insert into aom_task_soft (taskid,softTYPEID)values (%s,%s)"%(d.getLaseID(),request.POST.get('softversion',1)))
     d.commit()
     d.close()
-    return HttpResponse(json.dumps({}), content_type='application/json')    
+    return HttpResponse(json.dumps({'status':'true'}), content_type='application/json')    
 
 #安装jdk表单
 @login_required(login_url="/admin/login/")
@@ -196,7 +195,6 @@ def tomcatcommit(request):
         return HttpResponse(json.dumps(return_json), content_type='application/json')        
     sql="SELECT softpath,softfiles FROM aom_softtype where softTYPEID="+request.POST.get('softversion',1)
     d=db.opMysqlObj(**{'dbname':'default'})
-    #print(request.POST.getlist('nodeselect'))
     localpathfiles=d.getData(sql=sql)
     data={'task':'installsoftware',
           'localpath':localpathfiles[0][0],
@@ -274,15 +272,12 @@ def postData(request):
 def _getDefaultpath(softtypeid):
     dbcon=db.opMysqlObj(**{'dbname':'default'})
     return(dbcon.getDefaultPath(**{'softtypeid':softtypeid}))
-
+     
 def _checkTomcatForm(**kwage):
     temp=[]
     dbcon=db.opMysqlObj(**{'dbname':'default'})
-    for i in kwage['node']:
-    
+    for i in kwage['node']:   
         sql="SELECT COUNT(*) FROM aom_appserver a ,aom_appserver_tomcat b WHERE a.`appserverid`=b.`appserverid` AND nodeid ='%s' AND (http_port='%s' OR shutdown_port='%s' OR ajp_port='%s' OR baseDir='%s')"%(i,kwage['httpport'],kwage['shutdownport'],kwage['ajpport'],kwage['remotepath'])
-        #print(dbcon.getData(sql=sql))
-        #print(sql)
         if dbcon.getData(sql=sql)[0][0]==1:
              
             return({'status':'false','msg':i+'安装目录或端口有冲突'})

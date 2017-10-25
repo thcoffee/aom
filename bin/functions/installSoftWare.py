@@ -99,9 +99,20 @@ class nginx(object):
                     sql="insert into aom_msg (msgdate,msgtype,msgcontent,taskid)values (now(),2,'%s',%s)" %("".join([str(i),':',pymysql.escape_string(dict[i]['std'])]),self.taskid)
                     #stdLogger.debug(sql)
                     self.db.putData(sql=sql) 
-                    self.db.commit()    
+                    self.db.commit()  
+            if dict[i]['status']:
+                self._addNginxServer(i)
+            else:
+                pass                     
                 #stdLogger.debug(dict[i][j])
                 
+    def _addNginxServer(self,i):                
+        #sql='select appserver_type_id from aom_appserver_type where softtypeid=%s'%(self.taskDict['softtypeid'])     
+        sql="insert into aom_nginx (node_id,basedir)  values ('%s','%s')"%(str(i),self.taskDict['remotepath'])  
+        #stdLogger.debug(sql)
+        self.db.putData(sql=sql) 
+        self.db.commit()       
+        
 class tomcat(object):
     
     def __init__(self,**kwages):

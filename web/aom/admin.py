@@ -14,7 +14,6 @@ from .models import AomAppserver
 from .models import AomAppserverTomcat
 from .models import AomApp2Jvm
 from .models import AomNginx
-from .models import AomNginxConf
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
 
@@ -32,18 +31,18 @@ class AomAppserverAdmin(admin.ModelAdmin):
     list_display =('appserver_type','nodeid','path')
     inlines = [AomAppserverTomcatAdmin]
     
-
+class AomEnvironmentAdmin(admin.ModelAdmin):
+    filter_horizontal=('nginx',)
     
 admin.site.register(AomCustom)
 admin.site.register(AomProject)
 admin.site.register(AomApp,AomAppAdmin)
-admin.site.register(AomEnvironment)
+admin.site.register(AomEnvironment,AomEnvironmentAdmin)
 admin.site.register(AomNode)
 admin.site.register(AomOs)
 admin.site.register(AomAppserverType)
 admin.site.register(AomAppserver,AomAppserverAdmin)
 admin.site.register(AomApp2Jvm)
 admin.site.register(AomNginx)
-admin.site.register(AomNginxConf)
 admin.site.register(ContentType)
 admin.site.register(Permission)
