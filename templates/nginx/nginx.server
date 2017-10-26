@@ -1,0 +1,42 @@
+{% for i in data %}
+upstream i.appname {
+  {% for j in  %}
+  server 10.34.80.33:80;
+  server 10.34.80.34:80;
+  {% endfor %}
+  check interval=5000 rise=3 fall=3 timeout=1000 type=http port=8080;
+  check_http_send "GET /xems.html HTTP/1.0\r\n\r\n";
+  check_http_expect_alive http_2xx http_3xx ;
+  session_sticky cookie=erpname fallback=on mode=insert maxidle=1800000;
+  } 
+{% endfor %}
+server {
+      listen       {{port}};
+      server_name  {{domain}};
+            location =/status {
+            check_status;
+            access_log   off;
+      }
+  {%for j in data%}
+  location ~* ^/xems{
+    proxy_pass http://erpname;
+    proxy_set_header Host $host;              
+    proxy_set_header X-Real-Ip $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_read_timeout 1800s;
+    proxy_http_version 1.1;
+    proxy_buffer_size 128k;
+    proxy_buffers 32 32k;
+    proxy_busy_buffers_size 128k;
+    session_sticky_hide_cookie upstream=erpname;
+   }
+   {% endfor%}
+  error_page   500 502 503 504  /500.html;
+  error_page   403 404  /400.html;
+  location = /500.html {
+      root   html;
+  }
+  location = /400.html {
+      root   html;
+  }
+}  

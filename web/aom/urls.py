@@ -23,6 +23,10 @@ url(r'^tomcatcommit/$', views.tomcatcommit, name='tomcatcommit'),
 
 #安装软件相信信息
 url(r'^installsoftinfo/$', views.installsoftinfo, name='installsoftinfo'),
+#同步nginxconf列表
+url(r'^syncnginxconflist/$', views.syncnginxconflist, name='syncnginxconflist'),
+#同步nginxconf
+url(r'^syncnginxconf/$', views.syncnginxconf, name='syncnginxconf'),
 #post接口
 url(r'^postData/$', views.postData, name='postData'),
 #注销

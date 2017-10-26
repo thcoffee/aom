@@ -39,3 +39,6 @@ class opMysqlObj(object):
         
     def getDefaultPath(self,**kwages):
         return(self.getData(**{'sql':'select defaultpath from aom_softtype where softtypeid=%s'%(kwages['softtypeid'])})[0][0])
+    
+    def getCustoms(self,**kwages):
+        return(self.getData(**{'sql':'select customid,customname from aom_custom'}))

@@ -240,33 +240,50 @@ def installsoftinfo(request):
     data['objects_head']=objects_head
     return render(request, 'aom/installsoftinfo.html',data) 
 
+    
+def syncnginxconflist(request):
+    data=_initPage(request)
+    return render(request, 'aom/syncnginxconflist.html',data) 
+
+def syncnginxconf(request):
+    data=_initPage(request)
+    return render(request, 'aom/syncnginxconf.html',data) 
+      
 @login_required(login_url="/admin/login/")         
 @csrf_exempt    
 def postData(request):
     
     if request.method != "POST":
         return HttpResponse("参数错误")
-    #print(request.POST.get('softversion'))
-    return_json={'result':'error'}
-    
+    dbcon=db.opMysqlObj(**{'dbname':'default'})
+    #return_json={'result':'error'}
     if request.POST.get('page')=='installjdkadd':
         if request.POST.get('type')=='defautlpath':    
             return_json = {'result':{'defaultpath':_getDefaultpath(request.POST.get('softversion'))}}   
-    elif request.POST.get('page')=='installtomcatadd':
-        if request.POST.get('type')=='checkform':
-           #print(request.POST.get('httpport'),request.POST.get('remotepath'),request.POST.get('shutdownport'),request.POST.get('ajpport'),request.POST.get('node'),request.POST.getlist('node'))
-            time.sleep(10)
-            return_json = {'result':_checkTomcatForm(**{
-                                                         'httpport':request.POST.get('httpport'),
-                                                         'remotepath':request.POST.get('remotepath'),
-                                                         'shutdownport':request.POST.get('shutdownport'),
-                                                         'node':request.POST.getlist('node'),
-                                                         'ajpport':request.POST.get('ajpport'),
-                                                        }
-                                                     )
-                           }
-            
-         
+    #elif request.POST.get('page')=='installtomcatadd':
+    #    if request.POST.get('type')=='checkform':
+    #       #print(request.POST.get('httpport'),request.POST.get('remotepath'),request.POST.get('shutdownport'),request.POST.get('ajpport'),request.POST.get('node'),request.POST.getlist('node'))
+    #        time.sleep(10)
+    #        return_json = {'result':_checkTomcatForm(**{
+    #                                                     'httpport':request.POST.get('httpport'),
+    #                                                     'remotepath':request.POST.get('remotepath'),
+    #                                                     'shutdownport':request.POST.get('shutdownport'),
+    #                                                     'node':request.POST.getlist('node'),
+    #                                                     'ajpport':request.POST.get('ajpport'),
+    #                                                    }
+    #                                                 )
+    #                       }
+    #        
+    elif request.POST.get('page')=='syncnginxconf':
+        if request.POST.get('type')=='getcustom': 
+            return_json = {'table':dbcon.getCustoms(**{}),'status':'tudou'}
+        elif request.POST.get('type')=='getproject':
+            return_json = {'table':dbcon.getData(**{'sql':"select projectid,projectname from aom_project where customid=%s"%(request.POST.get('custom'))}),'status':'tudou'}
+        elif request.POST.get('type')=='getenvironment':
+            projectid=lambda x :x if x!='' else 0
+   
+            return_json = {'table':dbcon.getData(**{'sql':"select envid,envname from aom_environment where projectid=%s"%(projectid(request.POST.get('project',0)))}),'status':'tudou'}
+    print(return_json)
     return HttpResponse(json.dumps(return_json), content_type='application/json')        
 
 def _getDefaultpath(softtypeid):

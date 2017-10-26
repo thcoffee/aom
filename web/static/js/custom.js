@@ -12,19 +12,30 @@ function select2select(x,y){
         y.options[y.options.length]=new Option(x.value,x.text);
     x.options[x.selectedIndex]=null;}
 }
-//获取默认路径
-/*
-function getdefautlpath(){
-        $.post("/aom/postData/",{'page':'installjdkadd',
-                                 'type':'defautlpath',        
-                                 'softversion':$("#softversion").val()},function(result){
-             //alert(b);
-             $("#remotepath").prop("value",result.result.defaultpath);
-        });
-    }
-*/
+//提交方法
+function putdata(kwage){
+    $.ajax({url:kwage.url,  
+           data:kwage.data,
+           dataType:"json",
+           type:"POST",
+           success:kwage.success,
+           error:kwage.error,
+           }
+    );   
+}
 
-
+//初始化select信息
+function initselect($s,table){  
+    $s.empty();
+    //这么做是因为qq浏览器一类的，会有残留的图像
+    $s.append("<option  value=0>-----</option>");
+    $s.empty();
+     //alert(table);
+    for (var i=0; i<table.length; i++){
+        var item = table[i];
+          $s.append("<option  value=" + item[0] + ">" + item[1] + "</option>");
+        }
+}
 
 //是否自定义文本框
 function check2input($check,$input){
@@ -35,7 +46,10 @@ function check2input($check,$input){
         $input.prop("readOnly",true);  
         }     
 }
-
+//通用回调错误处理
+function callbackerror(XMLHttpRequest, textStatus, errorThrown){
+                 alert('访问网络失败！'+ errorThrown);
+}
 /*
 $(document).ready(function(){
     $('#custom').click(function(){

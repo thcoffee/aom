@@ -2,6 +2,8 @@ from django.db import models
 from . import db
 
 # Create your models here.
+
+#应用配置
 class AomApp(models.Model):
     appid = models.AutoField(primary_key=True)
     appname = models.CharField(max_length=50, blank=True, null=True)
@@ -14,12 +16,14 @@ class AomApp(models.Model):
         managed = False
         db_table = 'aom_app'
     def __str__(self):
-        return(str(self.projectid)+','+self.appname)
+        return(str(self.projectid)+'/'+self.appname)
 
+#应用对jvm
 class AomApp2Jvm(models.Model):
     app2jvmid = models.AutoField(primary_key=True)
     appid = models.ForeignKey(AomApp, models.DO_NOTHING, db_column='appid', blank=True, null=True)
     appserverid = models.ForeignKey('AomAppserver', models.DO_NOTHING, db_column='appserverid', blank=True, null=True)
+    envid = models.ForeignKey('AomEnvironment', models.DO_NOTHING, db_column='envid', blank=True, null=True)
     status = models.CharField(max_length=1024, blank=True, null=True)
 
     class Meta:
@@ -27,9 +31,10 @@ class AomApp2Jvm(models.Model):
         db_table = 'aom_app2jvm'
     
     def __str__(self):
-        return(",".join([str(self.appid),str(self.appserverid)]))
+        return("/".join([str(self.appid),str(self.appserverid),str(self.envid.envname)]))
 
 
+#应用对应starteam配置        
 class AomAppSt(models.Model):
     appid = models.ForeignKey(AomApp, models.DO_NOTHING, db_column='appid', primary_key=True)
     stproject = models.CharField(db_column='stProject', max_length=50, blank=True, null=True)  # Field name made lowercase.
@@ -45,11 +50,10 @@ class AomAppSt(models.Model):
         managed = False
         db_table = 'aom_app_st'
 
-
+#应用服务器配置
 class AomAppserver(models.Model):
     appserverid = models.AutoField(primary_key=True)
     appserver_type = models.ForeignKey('AomAppserverType', models.DO_NOTHING, blank=True, null=True)
-    envid = models.ForeignKey('AomEnvironment', models.DO_NOTHING, db_column='envid', blank=True, null=True)
     nodeid = models.ForeignKey('AomNode', models.DO_NOTHING, db_column='nodeid', blank=True, null=True)
     
     def path(self):
@@ -73,9 +77,10 @@ class AomAppserver(models.Model):
         #    ('views_aomappserver_info', '查看学员详细信息'),
         #)
     def __str__(self):
-        return(",".join([str(self.appserver_type),str(self.envid),str(self.nodeid)]))
+        return("/".join([str(self.appserver_type),str(self.nodeid)]))
 
 
+#应用服务器tomcat配置       
 class AomAppserverTomcat(models.Model):
     appserverid = models.ForeignKey(AomAppserver, models.DO_NOTHING, db_column='appserverid', primary_key=True)
     http_port = models.IntegerField(blank=True, null=True)
@@ -95,6 +100,7 @@ class AomAppserverTomcat(models.Model):
         #    ('views_aomappserver_info', '查看学员详细信息'),
         #)
 
+#应用服务器类型        
 class AomAppserverType(models.Model):
     appserver_type_id = models.AutoField(primary_key=True)
     appservername = models.CharField(max_length=50, blank=True, null=True)
@@ -108,6 +114,7 @@ class AomAppserverType(models.Model):
     def __str__(self):
         return(str(self.softtypeid))
 
+#软件类型
 class AomSofttype(models.Model):
     softtypeid = models.AutoField(primary_key=True)
     softname = models.CharField(max_length=50, blank=True, null=True)
@@ -121,8 +128,9 @@ class AomSofttype(models.Model):
         db_table = 'aom_softtype'   
 
     def __str__(self):
-        return("".join([self.softname,',',self.softversion]))        
+        return("/".join([self.softname,self.softversion]))        
 
+#客户配置        
 class AomCustom(models.Model):
     customid = models.AutoField(primary_key=True)
     customname = models.CharField(max_length=50, blank=True, null=True)
@@ -138,7 +146,8 @@ class AomCustom(models.Model):
         return(self.customname)
 class test(models.Model):
     tid = models.AutoField(primary_key=True)
-    
+
+#nginx配置    
 class AomNginx(models.Model):
     nginx_id = models.AutoField(primary_key=True)
     node = models.ForeignKey('AomNode', models.DO_NOTHING, blank=True, null=True)
@@ -150,7 +159,8 @@ class AomNginx(models.Model):
     
     def __str__(self):
         return("".join([str(self.node),':nginx']))
-        
+
+#环境配置        
 class AomEnvironment(models.Model):
     envid = models.AutoField(primary_key=True)
     envname = models.CharField(max_length=50, blank=True, null=True)
@@ -163,12 +173,12 @@ class AomEnvironment(models.Model):
         db_table = 'aom_environment'
     
     def __str__(self):
-        return(str(self.projectid)+','+self.envname)
+        return(str(self.projectid)+'/'+self.envname)
 
 
 
 
-        
+#节点配置        
 class AomNode(models.Model):
     nodeid = models.CharField(primary_key=True, max_length=50)
     osid = models.ForeignKey('AomOs', models.DO_NOTHING, db_column='osid', blank=True, null=True)
@@ -180,8 +190,9 @@ class AomNode(models.Model):
         db_table = 'aom_node'
 
     def __str__(self):
-        return(self.nodeid+':'+self.ip)
+        return(self.nodeid+'/'+self.ip)
 
+#操作系统配置        
 class AomOs(models.Model):
     osid = models.IntegerField(primary_key=True)
     osname = models.CharField(max_length=50, blank=True, null=True)
@@ -195,6 +206,7 @@ class AomOs(models.Model):
     def __str__(self):
         return(self.osname+self.osversion+self.osbit)
 
+#项目配置        
 class AomProject(models.Model):
     projectid = models.AutoField(primary_key=True)
     projectname = models.CharField(max_length=50, blank=True, null=True)
@@ -206,4 +218,4 @@ class AomProject(models.Model):
         db_table = 'aom_project'
     
     def __str__(self):
-        return(str(self.customid)+','+str(self.projectname))
+        return(str(self.customid)+'/'+str(self.projectname))
