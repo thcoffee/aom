@@ -8,6 +8,7 @@ import pymysql
 from functions import test1
 from functions import installSoftWare
 from functions import db as dbO
+from functions import syncConf
 stdLogger = logging.getLogger('root')
 
 #任务线程
@@ -70,6 +71,9 @@ class taskThreadObj(threading.Thread):
             if i['tasktype']==u'test1':
                 t=test1.test1(**i)
                 t.run() 
+            elif i['tasktype']==u'syncnginxconf':
+                t=syncConf.syncNginxConf(**i)
+                t.run()
             elif i['tasktype']==u'installsoftware':
                 if taskDict['name']=='jdk':
                     t=installSoftWare.jdk(**i)

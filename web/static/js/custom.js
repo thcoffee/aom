@@ -23,13 +23,16 @@ function putdata(kwage){
            }
     );   
 }
-
-//初始化select信息
-function initselect($s,table){  
+//清空select
+function clearselect($s){
     $s.empty();
     //这么做是因为qq浏览器一类的，会有残留的图像
     $s.append("<option  value=0>-----</option>");
     $s.empty();
+}
+//初始化select信息
+function initselect($s,table){  
+    clearselect($s);
      //alert(table);
     for (var i=0; i<table.length; i++){
         var item = table[i];

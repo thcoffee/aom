@@ -42,3 +42,12 @@ class opMysqlObj(object):
     
     def getCustoms(self,**kwages):
         return(self.getData(**{'sql':'select customid,customname from aom_custom'}))
+        
+    def getCustom(self,**kwages):
+        return(self.getData(**{'sql':'select customname from aom_custom where customid=%s'%(kwages['customid'])})[0][0])
+        
+    def getProject(self,**kwages):
+        return(self.getData(**{'sql':'select projectname from aom_project where projectid=%s'%(kwages['projectid'])})[0][0])
+        
+    def getEnvironment(self,**kwages):
+        return(self.getData(**{'sql':'select envname from aom_environment where envid=%s'%(kwages['envid'])})[0][0])        

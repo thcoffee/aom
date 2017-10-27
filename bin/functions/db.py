@@ -32,3 +32,18 @@ class opMysqlObj(object):
         
     def getDefaultPath(self,**kwages):
         return(self.getData(**{'sql':'select defaultpath from aom_softtype where softtypeid=%s'%(kwages['softtypeid'])})[0][0])
+        
+    def getDefaultPath(self,**kwages):
+        return(self.getData(**{'sql':'select defaultpath from aom_softtype where softtypeid=%s'%(kwages['softtypeid'])})[0][0])
+    
+    def getCustoms(self,**kwages):
+        return(self.getData(**{'sql':'select customid,customname from aom_custom'}))
+        
+    def getCustom(self,**kwages):
+        return(self.getData(**{'sql':'select customname from aom_custom where customid=%s'%(kwages['customid'])})[0]['customname'])
+        
+    def getProject(self,**kwages):
+        return(self.getData(**{'sql':'select projectname from aom_project where projectid=%s'%(kwages['projectid'])})[0]['projectname'])
+        
+    def getEnvironment(self,**kwages):
+        return(self.getData(**{'sql':'select envname from aom_environment where envid=%s'%(kwages['envid'])})[0]['envname'])      

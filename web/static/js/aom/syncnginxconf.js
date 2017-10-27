@@ -9,22 +9,32 @@ $(document).ready(putdata(customjson));
 
 //生成project
 function putProject(){
-    var data={'page':'syncnginxconf','type':'getproject','custom':$('#custom').val()};
-    var projectjson={'data':data,
-                    'url':"/aom/postData/",
-                    'success':callbackproject,
-                    'error':callbackerror,}
-    putdata(projectjson);
+    if ($('#custom').val()!=null){
+        var data={'page':'syncnginxconf','type':'getproject','custom':$('#custom').val()};
+        var projectjson={'data':data,
+                        'url':"/aom/postData/",
+                        'success':callbackproject,
+                        'error':callbackerror,}
+        putdata(projectjson);
+    }
+    else{
+        clearselect($('#project'));
+    }
 }
 
 //生成environment
-function putEnvironment(){                   
-    var data={'page':'syncnginxconf','type':'getenvironment','project':$('#project').val()};
-    var projectjson={'data':data,
-                    'url':"/aom/postData/",
-                    'success':callbackenvironment,
-                    'error':callbackerror,}
-    putdata(projectjson);
+function putEnvironment(){     
+    if ($('#project').val()!=null){              
+        var data={'page':'syncnginxconf','type':'getenvironment','project':$('#project').val()};
+        var projectjson={'data':data,
+                        'url':"/aom/postData/",
+                        'success':callbackenvironment,
+                        'error':callbackerror,}
+        putdata(projectjson);
+    }
+    else{
+        clearselect($('#environment'));
+    }
 }
 
 //生成环境信息,
@@ -45,19 +55,28 @@ function callbackcustom(result){
     
 }        
 
+//表单验证
+function checkform(){
+    if ($('#custom').val()!=null && $('#project').val()!=null && $('#environment').val()!=null){
+        //alert($('#environment').val)
+        return true;
+    }
+    else{
+        alert('客户、项目、环境都不可为空。');
+        return false;
+    }
+}
 
-//表单提交
+//提交表单
 function commit(){
-    $.ajax({url:"/aom/jdk/",
-            data:$('#frm').serialize(), 
-            type:"POST",
-            dataType:"json",
-            success:function(result){         
-                window.location.href = '/aom/installsoftlist'
-            },
-            error:function (XMLHttpRequest, textStatus, errorThrown){
-                 alert('访问网络失败！'+ errorThrown);
-                }
-            }
-    );                       
+    if (checkform()!=true){return false;}
+    var data={url:"/aom/syncnginxconfcommit/",
+              data:$('#frm').serialize(),
+              success:callback,
+              error:callbackerror,}
+    putdata(data);              
+}
+
+function callback(){
+    window.location.href = '/aom/syncnginxconflist'
 }

@@ -238,17 +238,45 @@ def installsoftinfo(request):
     data['objects']=objects
     data['page_range']=page_range
     data['objects_head']=objects_head
+    dbcon=db.opMysqlObj(**{'dbname':'default'})
     return render(request, 'aom/installsoftinfo.html',data) 
 
-    
+#nginx同步配置文件列表
+@login_required(login_url="/admin/login/")  
+@_auth_page        
 def syncnginxconflist(request):
     data=_initPage(request)
+    dbcon=db.opMysqlObj(**{'dbname':'default'})
+    sql="SELECT a.taskid,a.taskdate,f.`customname`,g.`projectname`,h.`envname`,d.`taskstatusname` FROM (SELECT taskid,taskdate,tasktype,userid,taskstatus FROM aom_task_before WHERE tasktype='syncnginxconf' UNION ALL  SELECT taskid,taskdate,tasktype,userid,taskstatus FROM aom_task_after WHERE tasktype='syncnginxconf')  a LEFT JOIN aom_task_type b ON a.tasktype=b.tasktypeid LEFT JOIN auth_user c ON a.userid=c.`id` LEFT JOIN aom_task_status d ON a.taskstatus=d.`taskstatusid` LEFT JOIN aom_task_syncnginxconf e ON a.taskid=e.`taskid` LEFT JOIN aom_custom f ON e.`customid`=f.`customid` LEFT JOIN aom_project g ON e.`projectid`=g.`projectid` LEFT JOIN aom_environment h ON e.`envid`=h.`envid` ORDER BY a.taskid DESC"
+    objects, page_range = _my_pagination(request, dbcon.getData(**{'sql':sql}))
+    dbcon.close()
+    objects_head=['任务ID','任务日期','客户名','项目名','环境名','状态']
+    data['objects']=objects
+    data['page_range']=page_range
+    data['objects_head']=objects_head
     return render(request, 'aom/syncnginxconflist.html',data) 
 
 def syncnginxconf(request):
     data=_initPage(request)
     return render(request, 'aom/syncnginxconf.html',data) 
-      
+
+@login_required(login_url="/admin/login/")      
+@csrf_exempt 
+def syncnginxconfcommit(request):
+    if request.method != "POST":
+        return HttpResponse("参数错误")
+    #_getNginxConfParam(request)
+    return_json={}
+    d=db.opMysqlObj(**{'dbname':'default'})
+    data={'customid':request.POST.get('custom'),
+          'projectid':request.POST.get('project'),
+          'envid':request.POST.get('environment')}
+    sql="INSERT INTO aom_task_before (taskdate,tasktype,userid,taskstatus,taskcontent) VALUES (NOW(),'syncnginxconf',1,1,'%s')" %(pymysql.escape_string(str(data)))
+    d.putData(sql=sql)
+    d.putData(sql="insert into aom_task_syncnginxconf (taskid,customid,projectid,envid)values (%s,%s,%s,%s)"%(d.getLaseID(),request.POST.get('custom'),request.POST.get('project'),request.POST.get('environment')))
+    d.commit()
+    return HttpResponse(json.dumps(return_json), content_type='application/json')      
+    
 @login_required(login_url="/admin/login/")         
 @csrf_exempt    
 def postData(request):
@@ -256,36 +284,40 @@ def postData(request):
     if request.method != "POST":
         return HttpResponse("参数错误")
     dbcon=db.opMysqlObj(**{'dbname':'default'})
-    #return_json={'result':'error'}
     if request.POST.get('page')=='installjdkadd':
         if request.POST.get('type')=='defautlpath':    
-            return_json = {'result':{'defaultpath':_getDefaultpath(request.POST.get('softversion'))}}   
-    #elif request.POST.get('page')=='installtomcatadd':
-    #    if request.POST.get('type')=='checkform':
-    #       #print(request.POST.get('httpport'),request.POST.get('remotepath'),request.POST.get('shutdownport'),request.POST.get('ajpport'),request.POST.get('node'),request.POST.getlist('node'))
-    #        time.sleep(10)
-    #        return_json = {'result':_checkTomcatForm(**{
-    #                                                     'httpport':request.POST.get('httpport'),
-    #                                                     'remotepath':request.POST.get('remotepath'),
-    #                                                     'shutdownport':request.POST.get('shutdownport'),
-    #                                                     'node':request.POST.getlist('node'),
-    #                                                     'ajpport':request.POST.get('ajpport'),
-    #                                                    }
-    #                                                 )
-    #                       }
-    #        
+            return_json = {'result':{'defaultpath':_getDefaultpath(request.POST.get('softversion'))}}          
     elif request.POST.get('page')=='syncnginxconf':
         if request.POST.get('type')=='getcustom': 
             return_json = {'table':dbcon.getCustoms(**{}),'status':'tudou'}
         elif request.POST.get('type')=='getproject':
             return_json = {'table':dbcon.getData(**{'sql':"select projectid,projectname from aom_project where customid=%s"%(request.POST.get('custom'))}),'status':'tudou'}
         elif request.POST.get('type')=='getenvironment':
-            projectid=lambda x :x if x!='' else 0
-   
-            return_json = {'table':dbcon.getData(**{'sql':"select envid,envname from aom_environment where projectid=%s"%(projectid(request.POST.get('project',0)))}),'status':'tudou'}
+            #projectid=lambda x :x if x!='' else 0
+            return_json = {'table':dbcon.getData(**{'sql':"select envid,envname from aom_environment where projectid=%s"%(request.POST.get('project',0))}),'status':'tudou'}
     print(return_json)
     return HttpResponse(json.dumps(return_json), content_type='application/json')        
 
+#def _getNginxConfParam(request):    
+#    return_json={'app':{}}
+#    d=db.opMysqlObj(**{'dbname':'default'})
+#    sql="SELECT a.appid,a.appname,b.`appRoot` FROM aom_app a LEFT JOIN aom_app_st b ON a.`appid`=b.`appid`  WHERE a.`appid` IN (SELECT appid FROM aom_app2jvm WHERE envid=%s GROUP BY appid)"%(request.POST.get('environment'))
+#    print(sql)
+#    print(d.getData(sql=sql))
+#    for i in d.getData(sql=sql):
+#        return_json['app'][i[1]]={}
+#        return_json['app'][i[1]]['appRoot']=i[2]
+#        return_json['app'][i[1]]['upstream']="_".join([d.getCustom(customid=request.POST.get('custom')),
+#                                                       d.getProject(projectid=request.POST.get('project')),
+#                                                       d.getEnvironment(envid=request.POST.get('environment'))])  
+#        sql="select domain from aom_environment where envid=%s"%(request.POST.get('environment'))   
+#        return_json['app'][i[1]]['domain']= d.getData(sql=sql)[0][0]
+#        return_json['app'][i[1]]['server']=[]     
+#        sql="SELECT c.`ip`,d.`http_port` FROM aom_app2jvm a LEFT JOIN aom_appserver b ON a.`appserverid`=b.`appserverid` LEFT JOIN aom_appserver_tomcat d ON b.`appserverid`=d.`appserverid`  LEFT JOIN aom_node c ON b.`nodeid`=c.`nodeid` WHERE `appid`=6"                               
+#        for j in d.getData(sql=sql):
+#            return_json['app'][i[1]]['server'].append(":".join([j[0],str(j[1])]))
+#    print(return_json)
+    
 def _getDefaultpath(softtypeid):
     dbcon=db.opMysqlObj(**{'dbname':'default'})
     return(dbcon.getDefaultPath(**{'softtypeid':softtypeid}))

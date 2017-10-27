@@ -27,6 +27,8 @@ url(r'^installsoftinfo/$', views.installsoftinfo, name='installsoftinfo'),
 url(r'^syncnginxconflist/$', views.syncnginxconflist, name='syncnginxconflist'),
 #同步nginxconf
 url(r'^syncnginxconf/$', views.syncnginxconf, name='syncnginxconf'),
+#同步nginxconfcommit
+url(r'^syncnginxconfcommit/$', views.syncnginxconfcommit, name='syncnginxconfcommit'),
 #post接口
 url(r'^postData/$', views.postData, name='postData'),
 #注销
