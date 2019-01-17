@@ -75,6 +75,7 @@ def _initPage(request):
 @login_required(login_url="/admin/login/")    
  
 def test(request):
+    time.sleep(600)
     data=_initPage(request)
     sql='select * from adc_deploy order by 1 limit 0,121'
     dbcon=db.opMysqlObj(**{'dbname':'zsj'})
